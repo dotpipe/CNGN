@@ -51,7 +51,7 @@
 
         public function _s(string $j, array $array_numbers)
         {
-            return ($j[0][0] == 1) ?
+            return ($j[0] == 1) ?
                 eval($this->math($j, $array_numbers)) : 
                 $this->cond($j, $array_numbers);
         } 
@@ -134,11 +134,11 @@
         */
         public function hi_math(string &$j, array &$sequence) : int
         {
-            if (substr($j,1) == "0"){
+            if (substr($j,0,1) == "0"){
                 $this->sigma = pow($sequence[0], $sequence[1]);
                 $this->move($j, $sequence);
             }
-            if (substr($j,1) == "1")
+            if (substr($j,0,1) == "1")
             {
                 $this->sigma = $this->derivative($j,$sequence);
             }
@@ -182,19 +182,21 @@
         public function derivative(string &$j, int &$sequence) : int
         {
             
-            if (substr($j,2) == "001")   // s1 * s2
+            if (substr($j,0,3) == "001")   // s1 * s2
                 $this->sigma = $this->sum_rule($sequence);
-            if (substr($j,2) == "010")   // s1 - s2
+            else if (substr($j,0,3) == "010")   // s1 - s2
                 $this->sigma = $this->diff_rule($sequence);
-            if (substr($j,2) == "011")   // s1 ^ s2
+            else if (substr($j,0,3) == "011")   // s1 ^ s2
                 $this->sigma = $this->power_rule($sequence);
-            if (substr($j,2) == "100")   // s1 * s2
+            else if (substr($j,0,3) == "100")   // s1 * s2
                 $this->sigma = $this->product_rule($sequence);
-            if (substr($j,2) == "101")   // s1 / s2
+            else if (substr($j,0,3) == "101")   // s1 / s2
                 $this->sigma = $this->quotient_rule($sequence);
-            if (substr($j,2) == "110")   // s1 * s2
+            else if (substr($j,0,3) == "110")   // s1 * s2
                 $this->sigma = $this->chain_rule($sequence);
-            $j = substr($j, 2);
+            else
+                return 0;
+            $j = substr($j, 3);
 
             return $this->sigma;
         }
@@ -391,11 +393,11 @@
         */
         public function move(string &$j, array &$sequence)
         {
-            if ($j[0] == 1)
+            if ($j[0] == "1")
                 array_unshift($this->FO,[$sequence[0], $sequence[1]]);
-            else if ($j[0] == 0)
+            else if ($j[0] == "0")
                 array_push($this->FO,[$sequence[0], $sequence[1]]);
-            $j = substr($j,2);
+            $j = substr($j,1);
             array_shift($sequence);
             array_shift($sequence);
         }
