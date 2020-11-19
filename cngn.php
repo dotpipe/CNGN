@@ -10,6 +10,7 @@
         public $f = "";
         public $g = "";
         public $vars = [];
+
         function __construct($index_cnt)
         {
             $this->messages[] = "Error: " ;
@@ -33,6 +34,7 @@
                 array_merge($this->vars, array('x' . dechex($x),false));
             }
         }
+
         /*
          *
          * Bit or Byte sequence is first byte
@@ -47,6 +49,7 @@
          * and it will type out a eval for you.
          * 
          * s == single return
+         * 
          */
 
         public function _s(string $j, array $array_numbers)
@@ -83,7 +86,6 @@
          * This will be joining together conditions in if statements
          * 
          */
-
         public function JOIN(string &$j)
         {
             if (substr($j,0,2) == "00")
@@ -130,7 +132,6 @@
             return;
         }
 
-        
         /*
         *
         * Higher Math
@@ -202,7 +203,7 @@
             return $this->sigma;
         }
 
-        public function derivative(string &$j, int &$sequence) : int
+        public function derivative(string &$j, array &$sequence) : int
         {
             
             if (substr($j,0,3) == "000")   // s1 * s2
@@ -284,10 +285,11 @@
         * Condition d/dx [f(x)+g(x)]
         * 
         */
-        public function sum_rule(int &$sequence) : int
+        public function sum_rule(array &$sequence) : int
         {
             $tmp1 = $this->get_f_of($sequence[0]);
             $tmp2 = $this->get_g_of($sequence[0]);
+            array_shift($sequence);
             return $this->math("00", [$tmp1, $tmp2]);
         }
 
@@ -296,10 +298,11 @@
         * Condition d/dx [f(x)-g(x)]
         * 
         */
-        public function diff_rule(int &$sequence) : int
+        public function diff_rule(array &$sequence) : int
         {
             $tmp1 = $this->get_f_of($sequence[0]);
             $tmp2 = $this->get_g_of($sequence[0]);
+            array_shift($sequence);
             return $this->math("01", [$tmp1, $tmp2]);
         }
 
@@ -320,7 +323,7 @@
         * Condition d/dx [f(x)g(x)]
         * 
         */
-        public function product_rule(int $sequence) : int
+        public function product_rule(array &$sequence) : int
         {
 
             // f'(x)                // f(x)
@@ -333,6 +336,7 @@
             $final1a = $this->math("10", [$tmp_ff, $tmp_g]);
             $final1b = $this->math("10", [$tmp_f, $tmp_gg]);
             $answer = $this->math("00", [$final1a, $final1b]);
+            array_shift($sequence);
             return $answer;
         }
 
@@ -341,7 +345,7 @@
         * Condition d/dx [f(g(x))]
         * 
         */
-        public function chain_rule(int $sequence) : int
+        public function chain_rule(array &$sequence) : int
         {
             // g'(x)                // g(x)
             $tmp_g = $this->get_g_of($sequence[0]);
@@ -352,6 +356,7 @@
             $tmp_ff = $this->get_f_of($tmp_f);
             $tmp_gg = $this->get_g_of($tmp_f);
             $answer = $this->math("10", [$tmp_ff, $tmp_gg]);
+            array_shift($sequence);
             return $answer;
         }
 
@@ -360,7 +365,7 @@
         * Condition d/dx [f(x)/g(x)]
         * 
         */
-        public function quotient_rule(int $sequence) : int
+        public function quotient_rule(array &$sequence) : int
         {
 
             $tmp_f = $this->get_f_of($sequence[0]);
@@ -372,6 +377,7 @@
             $final1b = $this->math("10", [$tmp_f, $tmp_gg]);
             $final2 = $this->math("01", [$final1a, $final1b]);
             $answer = $this->math("11", [$final2, $this->hi_math("00", [2, $tmp_g])]);
+            array_shift($sequence);
             return $answer;
         }
 
@@ -403,7 +409,7 @@
                 else
                     return 0;
                 $j = substr($j,3);
-                if (strlen($j) >= 6 && sizeof($sequence) > 2)
+                if (strlen($j) >= 3 && sizeof($sequence) > 2)
                     $this->JOIN($j);
                 $this->move($j, $sequence);
             }
