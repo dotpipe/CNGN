@@ -24,6 +24,15 @@
                 array_merge($this->vars, array('x' . dechex($x),false));
             }
         }
+
+        public function add_vars($index_cnt)
+        {
+            $x = sizeof($this->vars);
+            while (sizeof($this->vars) < $x + $index_cnt)
+            {
+                array_merge($this->vars, array('x' . dechex($x),false));
+            }
+        }
         /*
          *
          * Bit or Byte sequence is first byte
@@ -43,8 +52,8 @@
         public function _s(string $j, array $array_numbers)
         {
             return ($j[0][0] == 1) ?
-                $this->math($j, $array_numbers) : 
-                eval($this->cond($j, $array_numbers));
+                eval($this->math($j, $array_numbers)) : 
+                $this->cond($j, $array_numbers);
         } 
 
         /**
@@ -123,11 +132,13 @@
         * Higher Math
         * 
         */
-        public function hi_math(string &$j, array $sequence) : int
+        public function hi_math(string &$j, array &$sequence) : int
         {
-            if (substr($j,2) == "00")
+            if (substr($j,2) == "0"){
                 $this->sigma = pow($sequence[0], $sequence[1]);
-            if (substr($j,2) == "11")
+                $this->move($j, $sequence);
+            }
+            if (substr($j,2) == "1")
             {
                 $this->sigma = $this->derivative($j,$sequence);
             }
@@ -173,14 +184,16 @@
             
             if (substr($j,2) == "001")   // s1 * s2
                 $this->sigma = $this->sum_rule($sequence);
-            if (substr($j,2) == "011")   // s1 - s2
+            if (substr($j,2) == "010")   // s1 - s2
                 $this->sigma = $this->diff_rule($sequence);
-            if (substr($j,2) == "101")   // s1 ^ s2
+            if (substr($j,2) == "011")   // s1 ^ s2
                 $this->sigma = $this->power_rule($sequence);
-            if (substr($j,2) == "111")   // s1 / s2
+            if (substr($j,2) == "100")   // s1 * s2
+                $this->sigma = $this->product_rule($sequence);
+            if (substr($j,2) == "101")   // s1 / s2
                 $this->sigma = $this->quotient_rule($sequence);
             if (substr($j,2) == "110")   // s1 * s2
-                $this->sigma = $this->product_rule($sequence);
+                $this->sigma = $this->chain_rule($sequence);
             $j = substr($j, 2);
 
             return $this->sigma;
@@ -351,15 +364,15 @@
             {
                 if ("000" == substr($j,0,3))
                     $this->condition += $sequence[0] > $sequence[1];
-                else if ("111" == substr($j,0,3))
+                else if ("001" == substr($j,0,3))
                     $this->condition += $sequence[0] < $sequence[1];
-                else if ("101" == substr($j,0,3))
+                else if ("010" == substr($j,0,3))
                     $this->condition += $sequence[0] <= $sequence[1];
                 else if ("011" == substr($j,0,3))
                     $this->condition += $sequence[0] >= $sequence[1];
-                else if ("010" == substr($j,0,3))
+                else if ("100" == substr($j,0,3))
                     $this->condition += $sequence[0] == $sequence[1];
-                else if ("001" == substr($j,0,3))
+                else if ("101" == substr($j,0,3))
                     $this->condition += $sequence[0] != $sequence[1];
                 else
                     return 0;
