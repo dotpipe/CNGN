@@ -106,7 +106,7 @@
         {
             if ($string == "")
             {
-                $this->msg(0, 'Empty string given, try string_parse(string)\n\tuse a valid {x00} to place the variable\n\tThese are in $vars');
+                $this->msg(0, 'Empty string given, try string_parse(string)\n\tUse a valid {x00} to place the variable\n\tThese are keys in $vars');
                 return false;
             }
             $x = 0;
@@ -204,17 +204,17 @@
         public function derivative(string &$j, int &$sequence) : int
         {
             
-            if (substr($j,0,3) == "001")   // s1 * s2
+            if (substr($j,0,3) == "000")   // s1 * s2
                 $this->sigma = $this->sum_rule($sequence);
-            else if (substr($j,0,3) == "010")   // s1 - s2
+            else if (substr($j,0,3) == "001")   // s1 - s2
                 $this->sigma = $this->diff_rule($sequence);
-            else if (substr($j,0,3) == "011")   // s1 ^ s2
+            else if (substr($j,0,3) == "010")   // s1 ^ s2
                 $this->sigma = $this->power_rule($sequence);
-            else if (substr($j,0,3) == "100")   // s1 * s2
+            else if (substr($j,0,3) == "011")   // s1 * s2
                 $this->sigma = $this->product_rule($sequence);
-            else if (substr($j,0,3) == "101")   // s1 / s2
+            else if (substr($j,0,3) == "100")   // s1 / s2
                 $this->sigma = $this->quotient_rule($sequence);
-            else if (substr($j,0,3) == "110")   // s1 * s2
+            else if (substr($j,0,3) == "101")   // s1 * s2
                 $this->sigma = $this->chain_rule($sequence);
             else
                 return 0;
