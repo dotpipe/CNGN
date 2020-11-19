@@ -163,6 +163,7 @@
             if (substr($j,0,1) == "1")
             {
                 $this->sigma = $this->derivative($j,$sequence);
+                array_shift($sequence);
             }
             $j = substr($j,1);
             return $this->sigma;
