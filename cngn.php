@@ -12,16 +12,16 @@
         public $vars = [];
         function __construct($index_cnt)
         {
-            $messages[] = "Error: " ;
-            CNGN::load_vars($index_cnt);
+            CNGN::$messages[] = "Error: " ;
+            $this->load_vars($index_cnt);
         }
 
-        public static function load_vars($index_cnt)
+        public function load_vars($index_cnt)
         {
             $x = 0;
             while ($x < $index_cnt)
             {
-                array_merge(CNGN::$vars, array('x' . dechex($x),false));
+                array_merge($this->vars, array('x' . dechex($x),false));
             }
         }
         /*
@@ -85,6 +85,29 @@
 
         /*
         *
+        * Parse string of {xFA} x-hex values
+        * and replace with $vars values 
+        * 
+        */
+        public static function string_parse(string $string) : string
+        {
+            if ($string == "")
+            {
+                CNGN::msg(0, 'Empty string given, try string_parse(string)\n\tuse a valid {x00} to place the variable\n\tThese are in $vars');
+                return;
+            }
+            $x = 0;
+            while ($x < sizeof(CNGN::$vars) && strpos($string, "{x") !== false)
+            {
+                $c = "{x" . dechex($x) . "}";
+                $string = str_replace($c, CNGN::$vars[$c], strtolower($string));
+                $x++;
+            }
+            return $string;
+        }
+
+        /*
+        *
         * Echo message at $msg_id
         * 
         */
@@ -106,7 +129,7 @@
                 CNGN::$sigma = pow($sequence[0], $sequence[1]);
             if (substr($j,2) == "11")
             {
-                CNGN::$sigma = CNGN::derivative($j,$sequence[0], $sequence[1]);
+                CNGN::$sigma = CNGN::derivative($j,$sequence);
             }
             $j = substr($j,2);
             return CNGN::$sigma;
@@ -131,55 +154,59 @@
                     CNGN::msg(0, "Numeric convention not follow for function `math`");
                     return;
                 }
-                if (substr($j,2) == "00")
+                if (substr($j,0,2) == "00")
                     CNGN::$sigma = $sequence[0] + $sequence[1];
-                if (substr($j,2) == "01")
+                if (substr($j,0,2) == "01")
                     CNGN::$sigma = $sequence[0] - $sequence[1];
-                if (substr($j,2) == "10")
+                if (substr($j,0,2) == "10")
                     CNGN::$sigma = $sequence[0] * $sequence[1];
-                if (substr($j,2) == "11" && $sequence[1] != 0)
+                if (substr($j,0,2) == "11" && $sequence[1] != 0)
                     CNGN::$sigma = $sequence[0] / $sequence[1];
-                $j = substr($j,2);
+                $j = substr($j,0,2);
                 CNGN::move($j, $sequence);
             }
             return CNGN::$sigma;
         }
 
-        public static function derivative(string &$j, array &$sequence) : int
+        public static function derivative(string &$j, int &$sequence) : int
         {
             
-            if (substr($j,2) == "00")   // s1 * s2
+            if (substr($j,2) == "001")   // s1 * s2
                 CNGN::$sigma = CNGN::sum_rule($sequence);
-            if (substr($j,2) == "01")   // s1 - s2
+            if (substr($j,2) == "011")   // s1 - s2
                 CNGN::$sigma = CNGN::diff_rule($sequence);
-            if (substr($j,2) == "10")   // s1 * s2
-                CNGN::$sigma = CNGN::power_rule($sequence[0], $sequence[1]);
-            if (substr($j,2) == "11")   // s1 / s2
-                CNGN::$sigma = CNGN::quotient_rule($sequence[0], $sequence[1]);
+            if (substr($j,2) == "101")   // s1 ^ s2
+                CNGN::$sigma = CNGN::power_rule($sequence);
+            if (substr($j,2) == "111")   // s1 / s2
+                CNGN::$sigma = CNGN::quotient_rule($sequence);
+            if (substr($j,2) == "110")   // s1 * s2
+                CNGN::$sigma = CNGN::product_rule($sequence);
             $j = substr($j, 2);
-            CNGN::move($j, $sequence);
+
             return CNGN::$sigma;
         }
 
         /*
         *
-        * get function of g()
+        * get function of g() -- Use {x} wherever you need your variable
         * 
         */
-        public static function get_f_of(int $x)
+        public static function get_f_of(int $x) : int
         {
             if (CNGN::$f == "")
             {
-                CNGN::msg(0, 'No function given, try set_f_of(string x)\n\tuse {$x} to place the variable');
+                CNGN::msg(0, "No function given, try set_f_of(string x)\n\tUse {x} to place the variable");
                 return;
             }
             $y = $x;
-            return eval(str_replace('{$x}', $y, CNGN::$f));
+            if (is_int($x))
+                return eval(str_replace('{x}', $y, CNGN::$f));
+            return;
         }
 
         /*
         *
-        * set function of f()
+        * set function of f() -- Use {x} wherever you need your variable
         * 
         */
         public static function set_f_of(string $ev)
@@ -189,15 +216,18 @@
 
         /*
         *
-        * get function of g()
+        * get function of g() -- Use {x} wherever you need your variable
         * 
         */
         public static function get_g_of(int $x)
         {
-            if (CNGN::$f == "")
-                return false;
+            if (CNGN::$g == "")
+            {
+                CNGN::msg(0, "No function given, try set_g_of(string x)\n\tUse {x} to place the variable");
+                return;
+            }
             $y = $x;
-            return eval(str_replace('{$x}', $y, CNGN::$g));
+            return eval(str_replace('{x}', $y, CNGN::$g));
         }
 
         /*
@@ -217,8 +247,8 @@
         */
         public static function sum_rule(int &$sequence) : int
         {
-            $tmp1 = CNGN::get_f_of($sequence);
-            $tmp2 = CNGN::get_g_of($sequence);
+            $tmp1 = CNGN::get_f_of($sequence[0]);
+            $tmp2 = CNGN::get_g_of($sequence[0]);
             return CNGN::math("00", [$tmp1, $tmp2]);
         }
 
@@ -229,8 +259,8 @@
         */
         public static function diff_rule(int &$sequence) : int
         {
-            $tmp1 = CNGN::get_f_of($sequence);
-            $tmp2 = CNGN::get_g_of($sequence);
+            $tmp1 = CNGN::get_f_of($sequence[0]);
+            $tmp2 = CNGN::get_g_of($sequence[0]);
             return CNGN::math("01", [$tmp1, $tmp2]);
         }
 
@@ -255,9 +285,9 @@
         {
 
             // f'(x)                // f(x)
-            $tmp_f = CNGN::get_f_of($sequence);
+            $tmp_f = CNGN::get_f_of($sequence[0]);
             // g'(x)                // g(x)
-            $tmp_g = CNGN::get_g_of($sequence);
+            $tmp_g = CNGN::get_g_of($sequence[0]);
             
             $tmp_ff = CNGN::get_f_of($tmp_f);
             $tmp_gg = CNGN::get_g_of($tmp_g);
@@ -275,8 +305,8 @@
         public static function quotient_rule(int $sequence) : int
         {
 
-            $tmp_f = CNGN::get_f_of($sequence);
-            $tmp_g = CNGN::get_g_of($sequence);
+            $tmp_f = CNGN::get_f_of($sequence[0]);
+            $tmp_g = CNGN::get_g_of($sequence[0]);
 
             $tmp_ff = CNGN::get_f_of($tmp_f);
             $tmp_gg = CNGN::get_g_of($tmp_g);
