@@ -3,7 +3,7 @@
     class CNGN {
 
         public $FO = [];
-        public $sigma = 0;
+        public $sigma = [];
         public $condition = "";
         public $results = [];
         public $messages = [];
@@ -15,12 +15,14 @@
         {
             $this->messages[] = "Error: " ;
             $this->register_vars($index_cnt);
-            $string = "inadeio {x0} {x1} {x2} {x3} {x4}";
-            $this->load_vars([0 => "f", 1 => "123", 2 => "efd", 3 => "3", 4 => "d"]);
-            $string = $this->stringParse($string);
-            echo $string . " " . sizeof($this->vars);
-            $this->add_vars(3);
-            echo "\n" . sizeof($this->vars);
+            
+        }
+
+        public function string_replace($replacements, $template) {
+            return preg_replace_callback('/{(.+?)}/',
+                     function($matches) use ($replacements) {
+                return $replacements[$matches[1]];
+            }, $template);
         }
 
         public function load_vars(array $placements) : void
@@ -28,7 +30,7 @@
             foreach ($placements as $k => $v)
             {
                 $hex = 'x' . dechex($k);
-                $this->vars["$hex"] = $v;
+                $this->vars[$hex] = $v;
             }
             return;
         }
@@ -90,9 +92,10 @@
             while (strpos($string, "{x") !== false)
             {
                 $c = 'x' . dechex($x);
-                $string = str_replace("{$c}", $this->vars["$c"], strtolower($string));
+                $string = $this->string_replace($this->vars, $string);
                 $x++;
             }
+
             return $string;
         }
 
@@ -111,22 +114,26 @@
         {
             while (strlen($j) > 4)
             {
-                if (bindec(substr($j,0,5)) < 8)
+                if (bindec(substr($j,0,5)) < 8 && sizeof($sequence) > 1)
                 {
                     if (substr($j,0,5) == "00000")   // s1 * s2
                         $this->sigma[] = $this->sum_rule(array_slice($sequence,0,1));
                     else if (substr($j,0,5) == "00001")   // s1 - s2
                         $this->sigma[] = $this->diff_rule(array_slice($sequence,0,1));
-                    else if (substr($j,0,5) == "00010")   // s1 ^ s2
-                        $this->sigma[] = $this->power_rule(array_slice($sequence,0,1));
+                    else if (substr($j,0,5) == "00010" && sizeof($sequence) >= 2)   // s1 ^ s2
+                    {
+                        $this->sigma[] = $this->power_rule(array_slice($sequence,0,2));
+                        array_shift($sequence);
+                    }                    
                     else if (substr($j,0,5) == "00011")   // s1 * s2
                         $this->sigma[] = $this->product_rule(array_slice($sequence,0,1));
                     else if (substr($j,0,5) == "00100")   // s1 / s2
                         $this->sigma[] = $this->quotient_rule(array_slice($sequence,0,1));
                     else if (substr($j,0,5) == "00101")   // s1 * s2
                         $this->sigma[] = $this->chain_rule(array_slice($sequence,0,1));
+                    array_shift($sequence);
                 }
-                else if (bindec(substr($j,0,5)) < 13)
+                else if (bindec(substr($j,0,5)) < 13 && sizeof($sequence) > 2)
                 {
                     if (substr($j,0,5) == "01000")   // ^2
                         $this->sigma[] = pow(array_slice($sequence,0,1), $sequence[1]);
@@ -141,7 +148,7 @@
                     array_shift($sequence);
                     array_shift($sequence);
                 }
-                else if (bindec(substr($j,0,5)) < 20)
+                else if (bindec(substr($j,0,5)) < 20 && sizeof($sequence) > 2)
                 {
                     if (substr($j,0,5) == "01101")   // s1 + s2
                         $this->condition += $sequence[0] > $sequence[1];
@@ -157,6 +164,8 @@
                         $this->condition += $sequence[0] == $sequence[1];
                     else if (substr($j,0,5) == "10011")   // s1 / s2
                         $this->condition += $sequence[0] != $sequence[1];
+                    array_shift($sequence);
+                    array_shift($sequence);
                 }
                 else if (bindec(substr($j,0,5)) < 22)
                 {
@@ -190,10 +199,8 @@
             }
             $y = $x;
             if (is_array($x))
-            {
-                $str = str_replace('{x}', $y, $this->f);
-                return ($str);
-            }
+                return eval($this->string_replace(['x' => $y], $this->f));
+            
             exit(0);
         }
 
@@ -221,7 +228,7 @@
             }
             $y = $x;
             if (is_array($x))
-                return (str_replace('{x}', $y, $this->g));
+                return eval($this->string_replace(['x' => $y], $this->g));
         }
 
         /*
@@ -243,7 +250,7 @@
         {
             $tmp1 = $this->get_f_of((int)array_slice($sequence,0,1));
             $tmp2 = $this->get_g_of((int)array_slice($sequence,0,1));
-            $j = "00";
+            $j = "01001";
             $v = [$tmp1, $tmp2];
             return $this->_n($j, $v);
         }
@@ -253,12 +260,12 @@
         * Condition d/dx [f(x)-g(x)]
         * 
         */
-        public function diff_rule(array $sequence) : int
+        public function diff_rule(array $sequence)
         {
             $tmp1 = $this->get_f_of((int)array_slice($sequence,0,1));
             $tmp2 = $this->get_g_of((int)array_slice($sequence,0,1));
             //array_shift(array_slice($sequence,0,1));
-            $j = "00000";
+            $j = "01010";
             $v = [$tmp1, $tmp2];
             return $this->_n($j, $v);
         }
@@ -268,12 +275,11 @@
         * Condition d/dx [x^n]
         * 
         */
-        public function power_rule(array &$sequence) : int
+        public function power_rule(array $sequence)
         {
-            $tmp = [$sequence[0] , $sequence[1]];
-            //array_shift($sequence);
-            //array_shift($sequence);
-            return pow($tmp[0],$tmp[1]-1) * $tmp[1];
+            $tmp = $sequence;
+            var_dump($tmp);
+            return (float)(pow((int)$tmp[0],(int)$tmp[1]-1) * (float)$tmp[1]);
         }
 
         /*
@@ -281,7 +287,7 @@
         * Condition d/dx [f(x)g(x)]
         * 
         */
-        public function product_rule(array $sequence) : int
+        public function product_rule(array $sequence)
         {
 
             // f'(x)                // f(x)
@@ -291,10 +297,10 @@
             
             $tmp_ff = $this->get_f_of($tmp_f);
             $tmp_gg = $this->get_g_of($tmp_g);
-            $j = "01010";
+            $j = "01011";
             $final1a = $this->_n($j, [$tmp_ff, $tmp_g]);
             $final1b = $this->_n($j, [$tmp_f, $tmp_gg]);
-            $j = "01011";
+            $j = "01100";
             $answer = $this->_n($j, [$final1a, $final1b]);
             return $answer;
         }
@@ -304,17 +310,17 @@
         * Condition d/dx [f(g(x))]
         * 
         */
-        public function chain_rule(array $sequence) : int
+        public function chain_rule(array $sequence)
         {
             // g'(x)                // g(x)
             $tmp_g = $this->get_g_of((int)array_slice($sequence,0,1));
             
             // f'(x)                // f(x)
             $tmp_f = $this->get_f_of($tmp_g);
-
+            echo " " . $tmp_f;
             $tmp_ff = $this->get_f_of($tmp_f);
             $tmp_gg = $this->get_g_of($tmp_f);
-            $j = "01010";
+            $j = "01011";
             $answer = $this->_n($j, [$tmp_ff, $tmp_gg]);
             return $answer;
         }
@@ -324,7 +330,7 @@
         * Condition d/dx [f(x)/g(x)]
         * 
         */
-        public function quotient_rule(array $sequence) : int
+        public function quotient_rule(array $sequence)
         {
 
             $tmp_f = $this->get_f_of((int)array_slice($sequence,0,1));
@@ -332,12 +338,12 @@
 
             $tmp_ff = $this->get_f_of($tmp_f);
             $tmp_gg = $this->get_g_of($tmp_g);
-            $j = "01100";
+            $j = "01011";
             $final1a = $this->_n($j, [$tmp_ff, $tmp_g]);
             $final1b = $this->_n($j, [$tmp_f, $tmp_gg]);
-            $i = "01010";
+            $i = "01011";
             $final2 = $this->_n($i, [$final1a, $final1b]);
-            $m = "01011";
+            $m = "01100";
             $answer = $this->_n($m, [$final2, $this->_n($m, [$tmp_g, 2])]);
             return $answer;
         }
