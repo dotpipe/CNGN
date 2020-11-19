@@ -9,84 +9,59 @@
         public $messages = [];
         public $f = "";
         public $g = "";
-        public $vars = [];
+        public $vars;
 
         function __construct($index_cnt)
         {
             $this->messages[] = "Error: " ;
-            $this->load_vars($index_cnt);
+            $this->register_vars($index_cnt);
+            $string = "inadeio {x0} {x1} {x2} {x3} {x4}";
+            $this->load_vars([0 => "f", 1 => "123", 2 => "efd", 3 => "3", 4 => "d"]);
+            $string = $this->stringParse($string);
+            echo $string . " " . sizeof($this->vars);
+            $this->add_vars(3);
+            echo "\n" . sizeof($this->vars);
         }
 
-        public function load_vars($index_cnt)
+        public function load_vars(array $placements) : void
+        {
+            foreach ($placements as $k => $v)
+            {
+                $hex = 'x' . dechex($k);
+                $this->vars["$hex"] = $v;
+            }
+            return;
+        }
+
+        public function register_vars($index_cnt)
         {
             $x = 0;
             while ($x < $index_cnt)
             {
-                array_merge($this->vars, array('x' . dechex($x),false));
+                $hex = 'x' . dechex($x);
+                $this->vars[$hex] = false;
+                $x++;
             }
         }
 
         public function add_vars($index_cnt)
         {
-            $x = sizeof($this->vars);
-            while (sizeof($this->vars) < $x + $index_cnt)
+            $x = count($this->vars);
+            $s = $x;
+            do
             {
-                array_merge($this->vars, array('x' . dechex($x),false));
-            }
+                $hex = 'x' . dechex($s);
+                $this->vars[$hex] = false;
+                $s++;
+            } while ($s < $x + $index_cnt);
         }
 
-        /*
-         *
-         * Bit or Byte sequence is first byte
-         * 
-         *
-         * first bit is 0 = math; or 1 = logical statement
-         * 
-         * Make sure to fill in $j with the right binary
-         * or it will not give you the correct results.
-         *
-         * Each $j element will go through its conditions and math
-         * and it will type out a eval for you.
-         * 
-         * s == single return
-         * 
-         */
-
-        public function _s(string $j, array $array_numbers)
-        {
-            // Fill in first with 1 or 0 for math/conditionals
-            // Second, if math should be 1 for high math/ 0 for arithmetic
-            return ($j[0] == 1) ?
-                eval($this->hi_lo($j, $array_numbers)) : 
-                $this->cond($j, $array_numbers);
-        } 
-
-        /**
-         * 
-         * m == multiple returns;
-         * 
-         */
-        public function _m(array $j, array $array_numbers) : array
-        {
-            while (sizeof($j) > 1)
-            {
-                // Fill in first with 1 or 0 for math/conditionals
-                // Second, if math should be 1 for high math/ 0 for arithmetic
-                $x = ($j[0][0] == 1) ?
-                    $this->hi_lo($j, $array_numbers) :
-                    $this->cond($j, $array_numbers);
-                $this->results[] = ($j[0][0] == 1) ? end($x) : eval(end($x));
-                array_shift($j);
-            }
-            return $this->results;
-        }
- 
         /**
          * 
          * This will be joining together conditions in if statements
          * 
          */
-        public function JOIN(string &$j)
+        public function join(string $j)
         {
             if (substr($j,0,2) == "00")
                 $this->condition += "&&";
@@ -104,7 +79,7 @@
         * and replace with $vars values 
         * 
         */
-        public function string_parse(string $string)
+        public function stringParse(string $string)
         {
             if ($string == "")
             {
@@ -112,10 +87,10 @@
                 return false;
             }
             $x = 0;
-            while ($x < sizeof($this->vars) && strpos($string, "{x") !== false)
+            while (strpos($string, "{x") !== false)
             {
-                $c = "{x" . dechex($x) . "}";
-                $string = str_replace($c, $this->vars["$c"], strtolower($string));
+                $c = 'x' . dechex($x);
+                $string = str_replace("{$c}", $this->vars["$c"], strtolower($string));
                 $x++;
             }
             return $string;
@@ -132,130 +107,29 @@
             return;
         }
 
-        /*
-        *
-        * Higher Math
-        * 
-        */
-        public function hi_math(string &$j, array &$sequence) : int
+        public function _n(string $j, array $sequence)
         {
-            $t = $j[0];
-            $j = substr($j,1);
-            if ($t == "0"){
-                $this->sigma = pow($sequence[0], $sequence[1]);
-                $this->move($j, $sequence);
-            }
-            if ($t == "1")
-            {
-                $this->sigma = $this->derivative($j,$sequence);
-            }
-            return $this->sigma;
-        }
-
-        /*
-        *
-        * Higher Math
-        * 
-        */
-        public function hi_lo(string &$j, array &$sequence) : int
-        {
-            $t = $j[0];
-            $j = substr($j,1);
-            if ($t == "0"){
-                $this->math($j, $sequence);
-            }
-            if ($t == "1")
-            {
-                $this->sigma = $this->derivative($j,$sequence);
-                array_shift($sequence);
-            }
-            return $this->sigma;
-        }
-
-        /*
-        *
-        * Math
-        * 
-        */
-        public function math(string &$j, array &$sequence)
-        {
-            // 00 == +
-            // 01 == -
-            // 10 == x
-            // 11 == /
-            // this function is LIFO based
-            while (strlen($j) > 1 && sizeof($sequence) > 0)
-            {
-                if (!is_int($sequence[0]) || !is_int($sequence[0]))
-                {
-                    $this->msg(0, "Numeric convention not follow for function `math`");
-                    return;
-                }
-                if (substr($j,0,2) == "00")
-                    $this->sigma[] = $sequence[0] + $sequence[1];
-                if (substr($j,0,2) == "01")
-                    $this->sigma[] = $sequence[0] - $sequence[1];
-                if (substr($j,0,2) == "10")
-                    $this->sigma[] = $sequence[0] * $sequence[1];
-                if (substr($j,0,2) == "11" && $sequence[1] != 0)
-                    $this->sigma[] = $sequence[0] / $sequence[1];
-                $j = substr($j,0,2);
-                $this->move($j, $sequence);
-            }
-            return $this->sigma;
-        }
-
-        public function derivative(string &$j, array &$sequence) : int
-        {
-            
-            if (substr($j,0,5) == "000")   // s1 * s2
-                $this->sigma[] = $this->sum_rule($sequence);
-            else if (substr($j,0,5) == "001")   // s1 - s2
-                $this->sigma[] = $this->diff_rule($sequence);
-            else if (substr($j,0,5) == "010")   // s1 ^ s2
-                $this->sigma[] = $this->power_rule($sequence);
-            else if (substr($j,0,5) == "011")   // s1 * s2
-                $this->sigma[] = $this->product_rule($sequence);
-            else if (substr($j,0,5) == "100")   // s1 / s2
-                $this->sigma[] = $this->quotient_rule($sequence);
-            else if (substr($j,0,5) == "101")   // s1 * s2
-                $this->sigma[] = $this->chain_rule($sequence);
-            else
-                return 0;
-            $j = substr($j, 3);
-
-            return $this->sigma;
-        }
-
-
-        public function _n(string &$j, array &$sequence)
-        {
-            while (strlen($j) > 0)
+            while (strlen($j) > 4)
             {
                 if (bindec(substr($j,0,5)) < 8)
                 {
                     if (substr($j,0,5) == "00000")   // s1 * s2
-                        $this->sigma[] = $this->sum_rule($sequence);
+                        $this->sigma[] = $this->sum_rule(array_slice($sequence,0,1));
                     else if (substr($j,0,5) == "00001")   // s1 - s2
-                        $this->sigma[] = $this->diff_rule($sequence);
+                        $this->sigma[] = $this->diff_rule(array_slice($sequence,0,1));
                     else if (substr($j,0,5) == "00010")   // s1 ^ s2
-                        $this->sigma[] = $this->power_rule($sequence);
+                        $this->sigma[] = $this->power_rule(array_slice($sequence,0,1));
                     else if (substr($j,0,5) == "00011")   // s1 * s2
-                        $this->sigma[] = $this->product_rule($sequence);
+                        $this->sigma[] = $this->product_rule(array_slice($sequence,0,1));
                     else if (substr($j,0,5) == "00100")   // s1 / s2
-                        $this->sigma[] = $this->quotient_rule($sequence);
+                        $this->sigma[] = $this->quotient_rule(array_slice($sequence,0,1));
                     else if (substr($j,0,5) == "00101")   // s1 * s2
-                        $this->sigma[] = $this->chain_rule($sequence);
-                    else if (substr($j,0,5) == "00111")   // f(g)
-                    {
-                        $this->sigma[] = $this->cond($j, $sequence);
-                        $this->move($j, $sequence);
-                    }
+                        $this->sigma[] = $this->chain_rule(array_slice($sequence,0,1));
                 }
                 else if (bindec(substr($j,0,5)) < 13)
                 {
-                    if (substr($j,0,5) == "01000")   // >=
-                        $this->sigma[] = pow(sequence[0], sequence[1]);
+                    if (substr($j,0,5) == "01000")   // ^2
+                        $this->sigma[] = pow(array_slice($sequence,0,1), $sequence[1]);
                     else if (substr($j,0,5) == "01001")   // s1 + s2
                         $this->sigma[] = $sequence[0] + $sequence[1];
                     else if (substr($j,0,5) == "01010")   // s1 - s2
@@ -264,7 +138,8 @@
                         $this->sigma[] = $sequence[0] * $sequence[1];
                     else if (substr($j,0,5) == "01100" && $sequence[1] !== 0)   // s1 / s2
                         $this->sigma[] = $sequence[0] / $sequence[1];
-                    $this->move($j, $sequence);
+                    array_shift($sequence);
+                    array_shift($sequence);
                 }
                 else if (bindec(substr($j,0,5)) < 20)
                 {
@@ -286,14 +161,14 @@
                 else if (bindec(substr($j,0,5)) < 22)
                 {
                     if (substr($j,0,5) == "10100")   // s1 + s2
-                        $this->get_f_of($sequence[0]);
+                        $this->get_f_of((int)array_slice($sequence,0,1));
                     else if (substr($j,0,5) == "10101")
-                        $this->get_g_of($sequence[0]);
-                    array_shift($sequence);
+                        $this->get_g_of((int)array_slice($sequence,0,1));
+                    array_shift(array_slice($sequence,0,1));
                 }
                 else
                 {
-                    $this->msg(0, "No code for " . substr($j,0,5) . ". Calls in this function go 0 thru 21 (00000-10101)");
+                    $this->msg(0, "No code for " . substr($j,0,5) . ". Calls in this function go 0 thru 21 (00000-10101).");
                     return 0;
                 }
                 $j = substr($j,5);
@@ -306,17 +181,20 @@
         * get function of g() -- Use {x} wherever you need your variable
         * 
         */
-        public function get_f_of(int $x) : string
+        public function get_f_of(int $x)
         {
             if ($this->f == "")
             {
-                $this->msg(0, "No function given, try set_f_of(string x)\n\tUse {x} to place the variable");
-                return "";
+                $this->msg(0, "No function given, try set_f_of(string x)\n\tUse {x} to place the variable.");
+                exit(0);
             }
             $y = $x;
-            if (is_int($x))
-                return eval(str_replace('{x}', $y, $this->f));
-            return "";
+            if (is_array($x))
+            {
+                $str = str_replace('{x}', $y, $this->f);
+                return ($str);
+            }
+            exit(0);
         }
 
         /*
@@ -342,8 +220,8 @@
                 return;
             }
             $y = $x;
-            if (is_int($x))
-                return eval(str_replace('{x}', $y, $this->g));
+            if (is_array($x))
+                return (str_replace('{x}', $y, $this->g));
         }
 
         /*
@@ -361,12 +239,13 @@
         * Condition d/dx [f(x)+g(x)]
         * 
         */
-        public function sum_rule(array &$sequence) : int
+        public function sum_rule(array $sequence)
         {
-            $tmp1 = $this->get_f_of($sequence[0]);
-            $tmp2 = $this->get_g_of($sequence[0]);
-            array_shift($sequence);
-            return $this->math("00", [$tmp1, $tmp2]);
+            $tmp1 = $this->get_f_of((int)array_slice($sequence,0,1));
+            $tmp2 = $this->get_g_of((int)array_slice($sequence,0,1));
+            $j = "00";
+            $v = [$tmp1, $tmp2];
+            return $this->_n($j, $v);
         }
 
         /*
@@ -374,12 +253,14 @@
         * Condition d/dx [f(x)-g(x)]
         * 
         */
-        public function diff_rule(array &$sequence) : int
+        public function diff_rule(array $sequence) : int
         {
-            $tmp1 = $this->get_f_of($sequence[0]);
-            $tmp2 = $this->get_g_of($sequence[0]);
-            array_shift($sequence);
-            return $this->math("01", [$tmp1, $tmp2]);
+            $tmp1 = $this->get_f_of((int)array_slice($sequence,0,1));
+            $tmp2 = $this->get_g_of((int)array_slice($sequence,0,1));
+            //array_shift(array_slice($sequence,0,1));
+            $j = "00000";
+            $v = [$tmp1, $tmp2];
+            return $this->_n($j, $v);
         }
 
         /*
@@ -390,7 +271,8 @@
         public function power_rule(array &$sequence) : int
         {
             $tmp = [$sequence[0] , $sequence[1]];
-            $this->move($j, $sequence);
+            //array_shift($sequence);
+            //array_shift($sequence);
             return pow($tmp[0],$tmp[1]-1) * $tmp[1];
         }
 
@@ -399,20 +281,21 @@
         * Condition d/dx [f(x)g(x)]
         * 
         */
-        public function product_rule(array &$sequence) : int
+        public function product_rule(array $sequence) : int
         {
 
             // f'(x)                // f(x)
-            $tmp_f = $this->get_f_of($sequence[0]);
+            $tmp_f = $this->get_f_of((int)array_slice($sequence,0,1));
             // g'(x)                // g(x)
-            $tmp_g = $this->get_g_of($sequence[0]);
+            $tmp_g = $this->get_g_of((int)array_slice($sequence,0,1));
             
             $tmp_ff = $this->get_f_of($tmp_f);
             $tmp_gg = $this->get_g_of($tmp_g);
-            $final1a = $this->math("10", [$tmp_ff, $tmp_g]);
-            $final1b = $this->math("10", [$tmp_f, $tmp_gg]);
-            $answer = $this->math("00", [$final1a, $final1b]);
-            array_shift($sequence);
+            $j = "01010";
+            $final1a = $this->_n($j, [$tmp_ff, $tmp_g]);
+            $final1b = $this->_n($j, [$tmp_f, $tmp_gg]);
+            $j = "01011";
+            $answer = $this->_n($j, [$final1a, $final1b]);
             return $answer;
         }
 
@@ -421,18 +304,18 @@
         * Condition d/dx [f(g(x))]
         * 
         */
-        public function chain_rule(array &$sequence) : int
+        public function chain_rule(array $sequence) : int
         {
             // g'(x)                // g(x)
-            $tmp_g = $this->get_g_of($sequence[0]);
+            $tmp_g = $this->get_g_of((int)array_slice($sequence,0,1));
             
             // f'(x)                // f(x)
             $tmp_f = $this->get_f_of($tmp_g);
 
             $tmp_ff = $this->get_f_of($tmp_f);
             $tmp_gg = $this->get_g_of($tmp_f);
-            $answer = $this->math("10", [$tmp_ff, $tmp_gg]);
-            array_shift($sequence);
+            $j = "01010";
+            $answer = $this->_n($j, [$tmp_ff, $tmp_gg]);
             return $answer;
         }
 
@@ -441,75 +324,22 @@
         * Condition d/dx [f(x)/g(x)]
         * 
         */
-        public function quotient_rule(array &$sequence) : int
+        public function quotient_rule(array $sequence) : int
         {
 
-            $tmp_f = $this->get_f_of($sequence[0]);
-            $tmp_g = $this->get_g_of($sequence[0]);
+            $tmp_f = $this->get_f_of((int)array_slice($sequence,0,1));
+            $tmp_g = $this->get_g_of((int)array_slice($sequence,0,1));
 
             $tmp_ff = $this->get_f_of($tmp_f);
             $tmp_gg = $this->get_g_of($tmp_g);
-            $final1a = $this->math("10", [$tmp_ff, $tmp_g]);
-            $final1b = $this->math("10", [$tmp_f, $tmp_gg]);
-            $final2 = $this->math("01", [$final1a, $final1b]);
-            $answer = $this->math("11", [$final2, $this->hi_math("00", [2, $tmp_g])]);
-            array_shift($sequence);
+            $j = "01100";
+            $final1a = $this->_n($j, [$tmp_ff, $tmp_g]);
+            $final1b = $this->_n($j, [$tmp_f, $tmp_gg]);
+            $i = "01010";
+            $final2 = $this->_n($i, [$final1a, $final1b]);
+            $m = "01011";
+            $answer = $this->_n($m, [$final2, $this->_n($m, [$tmp_g, 2])]);
             return $answer;
-        }
-
-        /*
-        *
-        * Condition
-        * 
-        */
-        public function cond(string &$j, array &$sequence)
-        {
-            // condition statement
-            // > is 00   -  < is 111
-            // >= is 11  -  >= is 101
-            // == is 010  -  != is 001
-            
-            $t = substr($j,0,3);
-            $j = substr($j,3);
-            while (strlen($j) > 5 && sizeof($sequence) > 1)
-            {
-                if ("000" == $t)
-                    $this->condition += $sequence[0] > $sequence[1];
-                else if ("001" == $t)
-                    $this->condition += $sequence[0] < $sequence[1];
-                else if ("010" == $t)
-                    $this->condition += $sequence[0] <= $sequence[1];
-                else if ("011" == $t)
-                    $this->condition += $sequence[0] >= $sequence[1];
-                else if ("100" == $t)
-                    $this->condition += $sequence[0] == $sequence[1];
-                else if ("101" == $t)
-                    $this->condition += $sequence[0] != $sequence[1];
-                else
-                    return 0;
-                $t = substr($j,0,3);
-                $j = substr($j,3);
-                if (strlen($j) >= 3 && sizeof($sequence) > 2)
-                    $this->JOIN($j);
-                $this->move($j, $sequence);
-            }
-            return 1;
-        }
-
-        /*
-        *
-        * Move
-        * 
-        */
-        public function move(string &$j, array &$sequence)
-        {
-            if ($j[0] == "1")
-                array_unshift($this->FO,[$sequence[0], $sequence[1]]);
-            else if ($j[0] == "0")
-                array_push($this->FO,[$sequence[0], $sequence[1]]);
-            $j = substr($j,1);
-            array_shift($sequence);
-            array_shift($sequence);
         }
     }
 ?>
