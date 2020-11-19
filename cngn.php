@@ -12,7 +12,7 @@
         public $vars = [];
         function __construct($index_cnt)
         {
-            CNGN::$messages[] = "Error: " ;
+            $this->messages[] = "Error: " ;
             $this->load_vars($index_cnt);
         }
 
@@ -40,11 +40,11 @@
          * s == single return
          */
 
-        public static function _s(string $j, array $array_numbers)
+        public function _s(string $j, array $array_numbers)
         {
             return ($j[0][0] == 1) ?
-                CNGN::math($j, $array_numbers) : 
-                eval(CNGN::cond($j, $array_numbers));
+                $this->math($j, $array_numbers) : 
+                eval($this->cond($j, $array_numbers));
         } 
 
         /**
@@ -52,17 +52,17 @@
          * m == multiple returns;
          * 
          */
-        public static function _m(array $j, array $array_numbers) : array
+        public function _m(array $j, array $array_numbers) : array
         {
             while (sizeof($j) > 1)
             {
                 $x = ($j[0][0] == 1) ?
-                    CNGN::math($j, $array_numbers) :
-                    CNGN::cond($j, $array_numbers);
-                CNGN::$results[] = ($j[0][0] == 1) ? end($x) : eval(end($x));
+                    $this->math($j, $array_numbers) :
+                    $this->cond($j, $array_numbers);
+                $this->results[] = ($j[0][0] == 1) ? end($x) : eval(end($x));
                 array_shift($j);
             }
-            return CNGN::$results;
+            return $this->results;
         }
  
         /**
@@ -71,14 +71,14 @@
          * 
          */
 
-        public static function JOIN(string &$j)
+        public function JOIN(string &$j)
         {
             if (substr($j,0,2) == "00")
-                CNGN::$condition += "&&";
+                $this->condition += "&&";
             if (substr($j,0,2) == "01")
-                CNGN::$condition += "||";
+                $this->condition += "||";
             if (substr($j,0,2) == "10")
-                CNGN::$condition += "^";
+                $this->condition += "^";
             $j = substr($j,2);
             return;
         }
@@ -89,18 +89,18 @@
         * and replace with $vars values 
         * 
         */
-        public static function string_parse(string $string) : string
+        public function string_parse(string $string) : string
         {
             if ($string == "")
             {
-                CNGN::msg(0, 'Empty string given, try string_parse(string)\n\tuse a valid {x00} to place the variable\n\tThese are in $vars');
+                $this->msg(0, 'Empty string given, try string_parse(string)\n\tuse a valid {x00} to place the variable\n\tThese are in $vars');
                 return;
             }
             $x = 0;
-            while ($x < sizeof(CNGN::$vars) && strpos($string, "{x") !== false)
+            while ($x < sizeof($this->vars) && strpos($string, "{x") !== false)
             {
                 $c = "{x" . dechex($x) . "}";
-                $string = str_replace($c, CNGN::$vars[$c], strtolower($string));
+                $string = str_replace($c, $this->vars[$c], strtolower($string));
                 $x++;
             }
             return $string;
@@ -111,9 +111,9 @@
         * Echo message at $msg_id
         * 
         */
-        public static function msg(int $msg_id, string $arb_msg = "")
+        public function msg(int $msg_id, string $arb_msg = "")
         {
-            echo CNGN::$messages[$msg_id] . $arb_msg;
+            echo $this->messages[$msg_id] . $arb_msg;
             return;
         }
 
@@ -123,16 +123,16 @@
         * Higher Math
         * 
         */
-        public static function hi_math(string &$j, array $sequence) : int
+        public function hi_math(string &$j, array $sequence) : int
         {
             if (substr($j,2) == "00")
-                CNGN::$sigma = pow($sequence[0], $sequence[1]);
+                $this->sigma = pow($sequence[0], $sequence[1]);
             if (substr($j,2) == "11")
             {
-                CNGN::$sigma = CNGN::derivative($j,$sequence);
+                $this->sigma = $this->derivative($j,$sequence);
             }
             $j = substr($j,2);
-            return CNGN::$sigma;
+            return $this->sigma;
         }
 
         /*
@@ -140,7 +140,7 @@
         * Math
         * 
         */
-        public static function math(string &$j, array &$sequence) : int
+        public function math(string &$j, array &$sequence) : int
         {
             // 00 == +
             // 01 == -
@@ -151,39 +151,39 @@
             {
                 if (!is_int($sequence[0]) || !is_int($sequence[0]))
                 {
-                    CNGN::msg(0, "Numeric convention not follow for function `math`");
+                    $this->msg(0, "Numeric convention not follow for function `math`");
                     return;
                 }
                 if (substr($j,0,2) == "00")
-                    CNGN::$sigma = $sequence[0] + $sequence[1];
+                    $this->sigma = $sequence[0] + $sequence[1];
                 if (substr($j,0,2) == "01")
-                    CNGN::$sigma = $sequence[0] - $sequence[1];
+                    $this->sigma = $sequence[0] - $sequence[1];
                 if (substr($j,0,2) == "10")
-                    CNGN::$sigma = $sequence[0] * $sequence[1];
+                    $this->sigma = $sequence[0] * $sequence[1];
                 if (substr($j,0,2) == "11" && $sequence[1] != 0)
-                    CNGN::$sigma = $sequence[0] / $sequence[1];
+                    $this->sigma = $sequence[0] / $sequence[1];
                 $j = substr($j,0,2);
-                CNGN::move($j, $sequence);
+                $this->move($j, $sequence);
             }
-            return CNGN::$sigma;
+            return $this->sigma;
         }
 
-        public static function derivative(string &$j, int &$sequence) : int
+        public function derivative(string &$j, int &$sequence) : int
         {
             
             if (substr($j,2) == "001")   // s1 * s2
-                CNGN::$sigma = CNGN::sum_rule($sequence);
+                $this->sigma = $this->sum_rule($sequence);
             if (substr($j,2) == "011")   // s1 - s2
-                CNGN::$sigma = CNGN::diff_rule($sequence);
+                $this->sigma = $this->diff_rule($sequence);
             if (substr($j,2) == "101")   // s1 ^ s2
-                CNGN::$sigma = CNGN::power_rule($sequence);
+                $this->sigma = $this->power_rule($sequence);
             if (substr($j,2) == "111")   // s1 / s2
-                CNGN::$sigma = CNGN::quotient_rule($sequence);
+                $this->sigma = $this->quotient_rule($sequence);
             if (substr($j,2) == "110")   // s1 * s2
-                CNGN::$sigma = CNGN::product_rule($sequence);
+                $this->sigma = $this->product_rule($sequence);
             $j = substr($j, 2);
 
-            return CNGN::$sigma;
+            return $this->sigma;
         }
 
         /*
@@ -191,16 +191,16 @@
         * get function of g() -- Use {x} wherever you need your variable
         * 
         */
-        public static function get_f_of(int $x) : int
+        public function get_f_of(int $x) : int
         {
-            if (CNGN::$f == "")
+            if ($this->f == "")
             {
-                CNGN::msg(0, "No function given, try set_f_of(string x)\n\tUse {x} to place the variable");
+                $this->msg(0, "No function given, try set_f_of(string x)\n\tUse {x} to place the variable");
                 return;
             }
             $y = $x;
             if (is_int($x))
-                return eval(str_replace('{x}', $y, CNGN::$f));
+                return eval(str_replace('{x}', $y, $this->f));
             return;
         }
 
@@ -209,9 +209,9 @@
         * set function of f() -- Use {x} wherever you need your variable
         * 
         */
-        public static function set_f_of(string $ev)
+        public function set_f_of(string $ev)
         {
-            CNGN::$f = $ev;
+            $this->f = $ev;
         }
 
         /*
@@ -219,15 +219,15 @@
         * get function of g() -- Use {x} wherever you need your variable
         * 
         */
-        public static function get_g_of(int $x)
+        public function get_g_of(int $x)
         {
-            if (CNGN::$g == "")
+            if ($this->g == "")
             {
-                CNGN::msg(0, "No function given, try set_g_of(string x)\n\tUse {x} to place the variable");
+                $this->msg(0, "No function given, try set_g_of(string x)\n\tUse {x} to place the variable");
                 return;
             }
             $y = $x;
-            return eval(str_replace('{x}', $y, CNGN::$g));
+            return eval(str_replace('{x}', $y, $this->g));
         }
 
         /*
@@ -235,9 +235,9 @@
         * set function of g()
         * 
         */
-        public static function set_g_of(string $ev)
+        public function set_g_of(string $ev)
         {
-            CNGN::$g = $ev;
+            $this->g = $ev;
         }
 
         /*
@@ -245,11 +245,11 @@
         * Condition d/dx [f(x)+g(x)]
         * 
         */
-        public static function sum_rule(int &$sequence) : int
+        public function sum_rule(int &$sequence) : int
         {
-            $tmp1 = CNGN::get_f_of($sequence[0]);
-            $tmp2 = CNGN::get_g_of($sequence[0]);
-            return CNGN::math("00", [$tmp1, $tmp2]);
+            $tmp1 = $this->get_f_of($sequence[0]);
+            $tmp2 = $this->get_g_of($sequence[0]);
+            return $this->math("00", [$tmp1, $tmp2]);
         }
 
         /*
@@ -257,11 +257,11 @@
         * Condition d/dx [f(x)-g(x)]
         * 
         */
-        public static function diff_rule(int &$sequence) : int
+        public function diff_rule(int &$sequence) : int
         {
-            $tmp1 = CNGN::get_f_of($sequence[0]);
-            $tmp2 = CNGN::get_g_of($sequence[0]);
-            return CNGN::math("01", [$tmp1, $tmp2]);
+            $tmp1 = $this->get_f_of($sequence[0]);
+            $tmp2 = $this->get_g_of($sequence[0]);
+            return $this->math("01", [$tmp1, $tmp2]);
         }
 
         /*
@@ -269,10 +269,10 @@
         * Condition d/dx [x^n]
         * 
         */
-        public static function power_rule(array &$sequence) : int
+        public function power_rule(array &$sequence) : int
         {
             $tmp = [$sequence[0] , $sequence[1]];
-            CNGN::move($j, $sequence);
+            $this->move($j, $sequence);
             return pow($tmp[0],$tmp[1]-1) * $tmp[1];
         }
 
@@ -281,20 +281,39 @@
         * Condition d/dx [f(x)g(x)]
         * 
         */
-        public static function product_rule(int $sequence) : int
+        public function product_rule(int $sequence) : int
         {
 
             // f'(x)                // f(x)
-            $tmp_f = CNGN::get_f_of($sequence[0]);
+            $tmp_f = $this->get_f_of($sequence[0]);
             // g'(x)                // g(x)
-            $tmp_g = CNGN::get_g_of($sequence[0]);
+            $tmp_g = $this->get_g_of($sequence[0]);
             
-            $tmp_ff = CNGN::get_f_of($tmp_f);
-            $tmp_gg = CNGN::get_g_of($tmp_g);
-            $final1a = CNGN::math("10", [$tmp_ff, $tmp_g]);
-            $final1b = CNGN::math("10", [$tmp_f, $tmp_gg]);
-            CNGN::$sigma = CNGN::math("00", [$final1a, $final1b]);
-            return CNGN::$sigma;
+            $tmp_ff = $this->get_f_of($tmp_f);
+            $tmp_gg = $this->get_g_of($tmp_g);
+            $final1a = $this->math("10", [$tmp_ff, $tmp_g]);
+            $final1b = $this->math("10", [$tmp_f, $tmp_gg]);
+            $this->sigma = $this->math("00", [$final1a, $final1b]);
+            return $this->sigma;
+        }
+
+        /*
+        *
+        * Condition d/dx [f(x)g(x)]
+        * 
+        */
+        public function chain_rule(int $sequence) : int
+        {
+            // g'(x)                // g(x)
+            $tmp_g = $this->get_g_of($sequence[0]);
+            
+            // f'(x)                // f(x)
+            $tmp_f = $this->get_f_of($tmp_g);
+
+            $tmp_ff = $this->get_f_of($tmp_f);
+            $tmp_gg = $this->get_g_of($tmp_f);
+            $this->sigma = $this->math("10", [$tmp_ff, $tmp_gg]);
+            return $this->sigma;
         }
 
         /*
@@ -302,19 +321,19 @@
         * Condition d/dx [f(x)/g(x)]
         * 
         */
-        public static function quotient_rule(int $sequence) : int
+        public function quotient_rule(int $sequence) : int
         {
 
-            $tmp_f = CNGN::get_f_of($sequence[0]);
-            $tmp_g = CNGN::get_g_of($sequence[0]);
+            $tmp_f = $this->get_f_of($sequence[0]);
+            $tmp_g = $this->get_g_of($sequence[0]);
 
-            $tmp_ff = CNGN::get_f_of($tmp_f);
-            $tmp_gg = CNGN::get_g_of($tmp_g);
-            $final1a = CNGN::math("10", [$tmp_ff, $tmp_g]);
-            $final1b = CNGN::math("10", [$tmp_f, $tmp_gg]);
-            $final2 = CNGN::math("01", [$final1a, $final1b]);
-            CNGN::$sigma = CNGN::math("11", [$final2, CNGN::hi_math("00", [2, $tmp_g])]);
-            return CNGN::$sigma;
+            $tmp_ff = $this->get_f_of($tmp_f);
+            $tmp_gg = $this->get_g_of($tmp_g);
+            $final1a = $this->math("10", [$tmp_ff, $tmp_g]);
+            $final1b = $this->math("10", [$tmp_f, $tmp_gg]);
+            $final2 = $this->math("01", [$final1a, $final1b]);
+            $this->sigma = $this->math("11", [$final2, $this->hi_math("00", [2, $tmp_g])]);
+            return $this->sigma;
         }
 
         /*
@@ -322,7 +341,7 @@
         * Condition
         * 
         */
-        public static function cond(string &$j, array &$sequence)
+        public function cond(string &$j, array &$sequence)
         {
             // condition statement
             // > is 00   -  < is 111
@@ -331,23 +350,23 @@
             while (strlen($j) > 5 && sizeof($sequence) > 1)
             {
                 if ("000" == substr($j,0,3))
-                    CNGN::$condition += $sequence[0] > $sequence[1];
+                    $this->condition += $sequence[0] > $sequence[1];
                 else if ("111" == substr($j,0,3))
-                    CNGN::$condition += $sequence[0] < $sequence[1];
+                    $this->condition += $sequence[0] < $sequence[1];
                 else if ("101" == substr($j,0,3))
-                    CNGN::$condition += $sequence[0] <= $sequence[1];
+                    $this->condition += $sequence[0] <= $sequence[1];
                 else if ("011" == substr($j,0,3))
-                    CNGN::$condition += $sequence[0] >= $sequence[1];
+                    $this->condition += $sequence[0] >= $sequence[1];
                 else if ("010" == substr($j,0,3))
-                    CNGN::$condition += $sequence[0] == $sequence[1];
+                    $this->condition += $sequence[0] == $sequence[1];
                 else if ("001" == substr($j,0,3))
-                    CNGN::$condition += $sequence[0] != $sequence[1];
+                    $this->condition += $sequence[0] != $sequence[1];
                 else
                     return 0;
                 $j = substr($j,3);
                 if (strlen($j) >= 6 && sizeof($sequence) > 2)
-                    CNGN::JOIN($j);
-                CNGN::move($j, $sequence);
+                    $this->JOIN($j);
+                $this->move($j, $sequence);
             }
             return 1;
         }
@@ -357,12 +376,12 @@
         * Move
         * 
         */
-        public static function move(string &$j, array &$sequence)
+        public function move(string &$j, array &$sequence)
         {
             if ($j[0] == 1)
-                array_unshift(CNGN::$FO,[$sequence[0], $sequence[1]]);
+                array_unshift($this->FO,[$sequence[0], $sequence[1]]);
             else if ($j[0] == 0)
-                array_push(CNGN::$FO,[$sequence[0], $sequence[1]]);
+                array_push($this->FO,[$sequence[0], $sequence[1]]);
             $j = substr($j,2);
             array_shift($sequence);
             array_shift($sequence);
