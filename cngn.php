@@ -51,8 +51,10 @@
 
         public function _s(string $j, array $array_numbers)
         {
+            // Fill in first with 1 or 0 for math/conditionals
+            // Second, if math should be 1 for high math/ 0 for arithmetic
             return ($j[0] == 1) ?
-                eval($this->math($j, $array_numbers)) : 
+                eval($this->hi_lo($j, $array_numbers)) : 
                 $this->cond($j, $array_numbers);
         } 
 
@@ -65,8 +67,10 @@
         {
             while (sizeof($j) > 1)
             {
+                // Fill in first with 1 or 0 for math/conditionals
+                // Second, if math should be 1 for high math/ 0 for arithmetic
                 $x = ($j[0][0] == 1) ?
-                    $this->math($j, $array_numbers) :
+                    $this->hi_lo($j, $array_numbers) :
                     $this->cond($j, $array_numbers);
                 $this->results[] = ($j[0][0] == 1) ? end($x) : eval(end($x));
                 array_shift($j);
