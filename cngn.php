@@ -98,12 +98,12 @@
         * and replace with $vars values 
         * 
         */
-        public function string_parse(string $string) : string
+        public function string_parse(string $string)
         {
             if ($string == "")
             {
                 $this->msg(0, 'Empty string given, try string_parse(string)\n\tuse a valid {x00} to place the variable\n\tThese are in $vars');
-                return;
+                return false;
             }
             $x = 0;
             while ($x < sizeof($this->vars) && strpos($string, "{x") !== false)
@@ -148,10 +148,28 @@
 
         /*
         *
+        * Higher Math
+        * 
+        */
+        public function hi_lo(string &$j, array &$sequence) : int
+        {
+            if (substr($j,0,1) == "0"){
+                $this->math($j, $sequence);
+            }
+            if (substr($j,0,1) == "1")
+            {
+                $this->sigma = $this->derivative($j,$sequence);
+            }
+            $j = substr($j,1);
+            return $this->sigma;
+        }
+
+        /*
+        *
         * Math
         * 
         */
-        public function math(string &$j, array &$sequence) : int
+        public function math(string &$j, array &$sequence)
         {
             // 00 == +
             // 01 == -
@@ -206,17 +224,17 @@
         * get function of g() -- Use {x} wherever you need your variable
         * 
         */
-        public function get_f_of(int $x) : int
+        public function get_f_of(int $x) : string
         {
             if ($this->f == "")
             {
                 $this->msg(0, "No function given, try set_f_of(string x)\n\tUse {x} to place the variable");
-                return;
+                return "";
             }
             $y = $x;
             if (is_int($x))
                 return eval(str_replace('{x}', $y, $this->f));
-            return;
+            return "";
         }
 
         /*
@@ -242,7 +260,8 @@
                 return;
             }
             $y = $x;
-            return eval(str_replace('{x}', $y, $this->g));
+            if (is_int($x))
+                return eval(str_replace('{x}', $y, $this->g));
         }
 
         /*
