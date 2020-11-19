@@ -109,7 +109,7 @@
             while ($x < sizeof($this->vars) && strpos($string, "{x") !== false)
             {
                 $c = "{x" . dechex($x) . "}";
-                $string = str_replace($c, $this->vars[$c], strtolower($string));
+                $string = str_replace($c, $this->vars["$c"], strtolower($string));
                 $x++;
             }
             return $string;
@@ -134,15 +134,15 @@
         */
         public function hi_math(string &$j, array &$sequence) : int
         {
-            if (substr($j,2) == "0"){
+            if (substr($j,1) == "0"){
                 $this->sigma = pow($sequence[0], $sequence[1]);
                 $this->move($j, $sequence);
             }
-            if (substr($j,2) == "1")
+            if (substr($j,1) == "1")
             {
                 $this->sigma = $this->derivative($j,$sequence);
             }
-            $j = substr($j,2);
+            $j = substr($j,1);
             return $this->sigma;
         }
 
