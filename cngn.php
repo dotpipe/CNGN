@@ -337,7 +337,7 @@
 
         /*
         *
-        * Condition d/dx [f(x)g(x)]
+        * Condition d/dx [f(g(x))]
         * 
         */
         public function chain_rule(int $sequence) : int
