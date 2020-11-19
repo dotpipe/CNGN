@@ -139,15 +139,16 @@
         */
         public function hi_math(string &$j, array &$sequence) : int
         {
-            if (substr($j,0,1) == "0"){
+            $t = $j[0];
+            $j = substr($j,1);
+            if ($t == "0"){
                 $this->sigma = pow($sequence[0], $sequence[1]);
                 $this->move($j, $sequence);
             }
-            if (substr($j,0,1) == "1")
+            if ($t == "1")
             {
                 $this->sigma = $this->derivative($j,$sequence);
             }
-            $j = substr($j,1);
             return $this->sigma;
         }
 
@@ -158,15 +159,16 @@
         */
         public function hi_lo(string &$j, array &$sequence) : int
         {
-            if (substr($j,0,1) == "0"){
+            $t = $j[0];
+            $j = substr($j,1);
+            if ($t == "0"){
                 $this->math($j, $sequence);
             }
-            if (substr($j,0,1) == "1")
+            if ($t == "1")
             {
                 $this->sigma = $this->derivative($j,$sequence);
                 array_shift($sequence);
             }
-            $j = substr($j,1);
             return $this->sigma;
         }
 
@@ -392,22 +394,26 @@
             // > is 00   -  < is 111
             // >= is 11  -  >= is 101
             // == is 010  -  != is 001
+            
+            $t = substr($j,0,3);
+            $j = substr($j,3);
             while (strlen($j) > 5 && sizeof($sequence) > 1)
             {
-                if ("000" == substr($j,0,3))
+                if ("000" == $t)
                     $this->condition += $sequence[0] > $sequence[1];
-                else if ("001" == substr($j,0,3))
+                else if ("001" == $t)
                     $this->condition += $sequence[0] < $sequence[1];
-                else if ("010" == substr($j,0,3))
+                else if ("010" == $t)
                     $this->condition += $sequence[0] <= $sequence[1];
-                else if ("011" == substr($j,0,3))
+                else if ("011" == $t)
                     $this->condition += $sequence[0] >= $sequence[1];
-                else if ("100" == substr($j,0,3))
+                else if ("100" == $t)
                     $this->condition += $sequence[0] == $sequence[1];
-                else if ("101" == substr($j,0,3))
+                else if ("101" == $t)
                     $this->condition += $sequence[0] != $sequence[1];
                 else
                     return 0;
+                $t = substr($j,0,3);
                 $j = substr($j,3);
                 if (strlen($j) >= 3 && sizeof($sequence) > 2)
                     $this->JOIN($j);
