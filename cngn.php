@@ -208,23 +208,97 @@
         public function derivative(string &$j, array &$sequence) : int
         {
             
-            if (substr($j,0,3) == "000")   // s1 * s2
+            if (substr($j,0,5) == "000")   // s1 * s2
                 $this->sigma[] = $this->sum_rule($sequence);
-            else if (substr($j,0,3) == "001")   // s1 - s2
+            else if (substr($j,0,5) == "001")   // s1 - s2
                 $this->sigma[] = $this->diff_rule($sequence);
-            else if (substr($j,0,3) == "010")   // s1 ^ s2
+            else if (substr($j,0,5) == "010")   // s1 ^ s2
                 $this->sigma[] = $this->power_rule($sequence);
-            else if (substr($j,0,3) == "011")   // s1 * s2
+            else if (substr($j,0,5) == "011")   // s1 * s2
                 $this->sigma[] = $this->product_rule($sequence);
-            else if (substr($j,0,3) == "100")   // s1 / s2
+            else if (substr($j,0,5) == "100")   // s1 / s2
                 $this->sigma[] = $this->quotient_rule($sequence);
-            else if (substr($j,0,3) == "101")   // s1 * s2
+            else if (substr($j,0,5) == "101")   // s1 * s2
                 $this->sigma[] = $this->chain_rule($sequence);
             else
                 return 0;
             $j = substr($j, 3);
 
             return $this->sigma;
+        }
+
+
+        public function _n(string &$j, array &$sequence)
+        {
+            while (strlen($j) > 0)
+            {
+                if (bindec(substr($j,0,5)) < 8)
+                {
+                    if (substr($j,0,5) == "00000")   // s1 * s2
+                        $this->sigma[] = $this->sum_rule($sequence);
+                    else if (substr($j,0,5) == "00001")   // s1 - s2
+                        $this->sigma[] = $this->diff_rule($sequence);
+                    else if (substr($j,0,5) == "00010")   // s1 ^ s2
+                        $this->sigma[] = $this->power_rule($sequence);
+                    else if (substr($j,0,5) == "00011")   // s1 * s2
+                        $this->sigma[] = $this->product_rule($sequence);
+                    else if (substr($j,0,5) == "00100")   // s1 / s2
+                        $this->sigma[] = $this->quotient_rule($sequence);
+                    else if (substr($j,0,5) == "00101")   // s1 * s2
+                        $this->sigma[] = $this->chain_rule($sequence);
+                    else if (substr($j,0,5) == "00111")   // f(g)
+                    {
+                        $this->sigma[] = $this->cond($j, $sequence);
+                        $this->move($j, $sequence);
+                    }
+                }
+                else if (bindec(substr($j,0,5)) < 13)
+                {
+                    if (substr($j,0,5) == "01000")   // >=
+                        $this->sigma[] = pow(sequence[0], sequence[1]);
+                    else if (substr($j,0,5) == "01001")   // s1 + s2
+                        $this->sigma[] = $sequence[0] + $sequence[1];
+                    else if (substr($j,0,5) == "01010")   // s1 - s2
+                        $this->sigma[] = $sequence[0] - $sequence[1];
+                    else if (substr($j,0,5) == "01011")   // s1 * s2
+                        $this->sigma[] = $sequence[0] * $sequence[1];
+                    else if (substr($j,0,5) == "01100" && $sequence[1] !== 0)   // s1 / s2
+                        $this->sigma[] = $sequence[0] / $sequence[1];
+                    $this->move($j, $sequence);
+                }
+                else if (bindec(substr($j,0,5)) < 20)
+                {
+                    if (substr($j,0,5) == "01101")   // s1 + s2
+                        $this->condition += $sequence[0] > $sequence[1];
+                    else if (substr($j,0,5) == "01110")   // s1 - s2
+                        $this->condition += $sequence[0] < $sequence[1];
+                    else if (substr($j,0,5) == "01111")   // s1 * s2
+                        $this->condition += $sequence[0] >= $sequence[1];
+                    else if (substr($j,0,5) == "10000")   // s1 / s2
+                        $this->condition += $sequence[0] > $sequence[1];
+                    else if (substr($j,0,5) == "10001")   // s1 - s2
+                        $this->condition += $sequence[0] <= $sequence[1];
+                    else if (substr($j,0,5) == "10010")   // s1 * s2
+                        $this->condition += $sequence[0] == $sequence[1];
+                    else if (substr($j,0,5) == "10011")   // s1 / s2
+                        $this->condition += $sequence[0] != $sequence[1];
+                }
+                else if (bindec(substr($j,0,5)) < 22)
+                {
+                    if (substr($j,0,5) == "10100")   // s1 + s2
+                        $this->get_f_of($sequence[0]);
+                    else if (substr($j,0,5) == "10101")
+                        $this->get_g_of($sequence[0]);
+                    array_shift($sequence);
+                }
+                else
+                {
+                    $this->msg(0, "No code for " . substr($j,0,5) . ". Calls in this function go 0 thru 21 (00000-10101)");
+                    return 0;
+                }
+                $j = substr($j,5);
+
+            }
         }
 
         /*
