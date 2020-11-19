@@ -181,7 +181,7 @@
             // 10 == x
             // 11 == /
             // this function is LIFO based
-            while (strlen($j) > 1 && sizeof($sequence) > 1)
+            while (strlen($j) > 1 && sizeof($sequence) > 0)
             {
                 if (!is_int($sequence[0]) || !is_int($sequence[0]))
                 {
@@ -189,13 +189,13 @@
                     return;
                 }
                 if (substr($j,0,2) == "00")
-                    $this->sigma = $sequence[0] + $sequence[1];
+                    $this->sigma[] = $sequence[0] + $sequence[1];
                 if (substr($j,0,2) == "01")
-                    $this->sigma = $sequence[0] - $sequence[1];
+                    $this->sigma[] = $sequence[0] - $sequence[1];
                 if (substr($j,0,2) == "10")
-                    $this->sigma = $sequence[0] * $sequence[1];
+                    $this->sigma[] = $sequence[0] * $sequence[1];
                 if (substr($j,0,2) == "11" && $sequence[1] != 0)
-                    $this->sigma = $sequence[0] / $sequence[1];
+                    $this->sigma[] = $sequence[0] / $sequence[1];
                 $j = substr($j,0,2);
                 $this->move($j, $sequence);
             }
@@ -206,17 +206,17 @@
         {
             
             if (substr($j,0,3) == "000")   // s1 * s2
-                $this->sigma = $this->sum_rule($sequence);
+                $this->sigma[] = $this->sum_rule($sequence);
             else if (substr($j,0,3) == "001")   // s1 - s2
-                $this->sigma = $this->diff_rule($sequence);
+                $this->sigma[] = $this->diff_rule($sequence);
             else if (substr($j,0,3) == "010")   // s1 ^ s2
-                $this->sigma = $this->power_rule($sequence);
+                $this->sigma[] = $this->power_rule($sequence);
             else if (substr($j,0,3) == "011")   // s1 * s2
-                $this->sigma = $this->product_rule($sequence);
+                $this->sigma[] = $this->product_rule($sequence);
             else if (substr($j,0,3) == "100")   // s1 / s2
-                $this->sigma = $this->quotient_rule($sequence);
+                $this->sigma[] = $this->quotient_rule($sequence);
             else if (substr($j,0,3) == "101")   // s1 * s2
-                $this->sigma = $this->chain_rule($sequence);
+                $this->sigma[] = $this->chain_rule($sequence);
             else
                 return 0;
             $j = substr($j, 3);
@@ -332,8 +332,8 @@
             $tmp_gg = $this->get_g_of($tmp_g);
             $final1a = $this->math("10", [$tmp_ff, $tmp_g]);
             $final1b = $this->math("10", [$tmp_f, $tmp_gg]);
-            $this->sigma = $this->math("00", [$final1a, $final1b]);
-            return $this->sigma;
+            $answer = $this->math("00", [$final1a, $final1b]);
+            return $answer;
         }
 
         /*
@@ -351,8 +351,8 @@
 
             $tmp_ff = $this->get_f_of($tmp_f);
             $tmp_gg = $this->get_g_of($tmp_f);
-            $this->sigma = $this->math("10", [$tmp_ff, $tmp_gg]);
-            return $this->sigma;
+            $answer = $this->math("10", [$tmp_ff, $tmp_gg]);
+            return $answer;
         }
 
         /*
@@ -371,8 +371,8 @@
             $final1a = $this->math("10", [$tmp_ff, $tmp_g]);
             $final1b = $this->math("10", [$tmp_f, $tmp_gg]);
             $final2 = $this->math("01", [$final1a, $final1b]);
-            $this->sigma = $this->math("11", [$final2, $this->hi_math("00", [2, $tmp_g])]);
-            return $this->sigma;
+            $answer = $this->math("11", [$final2, $this->hi_math("00", [2, $tmp_g])]);
+            return $answer;
         }
 
         /*
