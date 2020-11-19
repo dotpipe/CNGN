@@ -278,7 +278,7 @@
         public function power_rule(array $sequence)
         {
             $tmp = $sequence;
-            var_dump($tmp);
+            
             return (float)(pow((int)$tmp[0],(int)$tmp[1]-1) * (float)$tmp[1]);
         }
 
@@ -317,7 +317,7 @@
             
             // f'(x)                // f(x)
             $tmp_f = $this->get_f_of($tmp_g);
-            echo " " . $tmp_f;
+            
             $tmp_ff = $this->get_f_of($tmp_f);
             $tmp_gg = $this->get_g_of($tmp_f);
             $j = "01011";
