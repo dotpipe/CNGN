@@ -59,22 +59,6 @@
             } while ($s < $x + $index_cnt);
         }
 
-        /**
-         * 
-         * This will be joining together conditions in if statements
-         * 
-         */
-        public function join(string $j)
-        {
-            if (substr($j,0,2) == "00")
-                $this->condition += "&&";
-            if (substr($j,0,2) == "01")
-                $this->condition += "||";
-            if (substr($j,0,2) == "10")
-                $this->condition += "^";
-            return;
-        }
-
         /*
         *
         * Parse string of {xFA} x-hex values
@@ -91,7 +75,6 @@
             $x = 0;
             while (strpos($string, "{x") !== false)
             {
-                $c = 'x' . dechex($x);
                 $string = $this->string_replace($this->vars, $string);
                 $x++;
             }
@@ -178,7 +161,6 @@
                     $this->condition .= ((bool)substr($this->condition,-1) || $sequence[0] == $sequence[1]) ? 1 : 0;
                 else if ($t == "10011")   // s1 ^ s2
                     $this->condition .= ((bool)substr($this->condition,-1) ^ $sequence[0] == $sequence[1]) ? 1 : 0;
-                else if ()
                 array_shift($sequence);
                 array_shift($sequence);
             }
