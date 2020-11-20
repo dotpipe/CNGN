@@ -101,6 +101,7 @@
             
             while (count($j) > 0)
             {
+                //echo $j[0] . " ";
                 $t = $j[0];
                 array_shift($j);
                 if ($t == "00000")   // s1 * s2 
@@ -145,22 +146,24 @@
                     $this->sigma[] = (float)($sequence[0] * $sequence[1]);
                 else if ($t == "01010" && $sequence[1] != 0)   // s1 / s2
                     $this->sigma[] = (float)($sequence[0] / $sequence[1]);
-                else if ($t == "01011")   // s1 + s2
-                    $this->condition .= ($sequence[0] > $sequence[1]) ? 1 : 0;
-                else if ($t == "01100")   // s1 - s2
-                    $this->condition .= ($sequence[0] < $sequence[1]) ? 1 : 0;
+                else if ($t == "01011")   // s1 > s2
+                    $this->condition .= ($sequence[0] > $sequence[1]);
+                else if ($t == "01100")   // s1 < s2
+                    $this->condition .= ($sequence[0] < $sequence[1]);
                 else if ($t == "01101")   // s1 * s2
-                    $this->condition .= ($sequence[0] >= $sequence[1]) ? 1 : 0;
-                else if ($t == "01110")   // s1 / s2
-                    $this->condition .= ($sequence[0] <= $sequence[1]) ? 1 : 0;
-                else if ($t == "01111")   // s1 - s2
-                    $this->condition .= ($sequence[0] != $sequence[1]) ? 1 : 0;
+                    $this->condition .= ($sequence[0] >= $sequence[1]);
+                else if ($t == "01110")   // s1 >= s2
+                    $this->condition .= ($sequence[0] <= $sequence[1]);
+                else if ($t == "01111")   // s1 != s2
+                    $this->condition .= ($sequence[0] != $sequence[1]);
+                else if ($t == "10000")   // s1 != s2
+                    $this->condition .= ($sequence[0] == $sequence[1]);
                 else if ($t == "10001")   // s1 && s2
-                    $this->condition .= ((bool)substr($this->condition,-1) && $sequence[0] == $sequence[1]) ? 1 : 0;
+                    $this->condition .= ((bool)substr($this->condition,-1) && $sequence[0] == $sequence[1]);
                 else if ($t == "10010")   // s1 || s2
-                    $this->condition .= ((bool)substr($this->condition,-1) || $sequence[0] == $sequence[1]) ? 1 : 0;
+                    $this->condition .= ((bool)substr($this->condition,-1) || $sequence[0] == $sequence[1]);
                 else if ($t == "10011")   // s1 ^ s2
-                    $this->condition .= ((bool)substr($this->condition,-1) ^ $sequence[0] == $sequence[1]) ? 1 : 0;
+                    $this->condition .= ((bool)substr($this->condition,-1) ^ $sequence[0] == $sequence[1]);
                 array_shift($sequence);
                 array_shift($sequence);
             }
