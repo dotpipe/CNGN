@@ -1,6 +1,6 @@
 <?php
 
-include('./cngn.php');
+require('./cngn.php');
 
 $x = new CNGN(5); 
 

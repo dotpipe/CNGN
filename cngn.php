@@ -1,6 +1,6 @@
 <?php
 
-    namespace CNGN;
+    //namespace CNGN;
 
     class CNGN {
 
