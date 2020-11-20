@@ -1,0 +1,7 @@
+{
+    "name": "swatchphp/cngn",
+    "description": "Computational Machine Language Engine",
+    "require": {
+        "php": "^7.2"
+    }
+}

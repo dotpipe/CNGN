@@ -1,5 +1,7 @@
 <?php
 
+    namespace CNGN;
+
     class CNGN {
 
         public $FO = [];
