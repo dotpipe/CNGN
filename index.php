@@ -10,10 +10,10 @@ $string = $x->stringParse($string);
 echo $string . " " . sizeof($x->vars);
 $x->add_vars(3);
 echo "\n" . sizeof($x->vars);
-$j = "000100";
-$x->set_f_of("{x} - 2");
-$x->set_g_of("{x} + 1");
-$seq = [7,22];
-$x->_n($j, $seq); 
-echo $x->sigma[0];
+$j = ['qr'];
+$x->set_f_of('3 + {x}');
+$x->set_g_of('1 + {x} + 10');
+$seq = [10,4];
+$x->_n($j, $seq);
+echo " " . $x->sigma[0];
 ?>
