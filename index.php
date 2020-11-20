@@ -10,7 +10,7 @@ $string = $x->stringParse($string);
 echo $string . " " . sizeof($x->vars);
 $x->add_vars(3);
 echo "\n" . sizeof($x->vars);
-$j = ['qr'];
+$j = "00000";
 $x->set_f_of('3 + {x}');
 $x->set_g_of('1 + {x} + 10');
 $seq = [10,4];

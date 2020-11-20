@@ -114,7 +114,7 @@
                 $this->msg(0, "Command length in bits is not mod 5.");
                 return;
             }
-            while (count($j) > 0)
+            while (strlen($j) > 0)
             {
                 $t = substr($j,0,5);
                 $j = substr($j,5);
