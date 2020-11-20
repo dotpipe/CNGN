@@ -107,74 +107,75 @@
             return;
         }
 
-        public function _n(array $j, array $sequence)
+        public function _n(string $j, array $sequence)
         {
+            if (strlen($j)%5 != 0)
+            {
+                $this->msg(0, "Command length in bits is not mod 5.");
+                return;
+            }
             while (count($j) > 0)
             {
-                if ($j[0] == "sr")   // s1 * s2 
+                $t = substr($j,0,5);
+                $j = substr($j,5);
+                if ($t == "00000")   // s1 * s2 
                 {
                     $this->sigma[] = $this->sum_rule($sequence[0]);
                     array_shift($sequence);
-                    array_shift($j);
                     continue;
                 }
-                else if ($j[0] == "dr")   // s1 - s2
+                else if ($t == "00001")   // s1 - s2
                 {
                     $this->sigma[] = $this->diff_rule($sequence[0]);
                     array_shift($sequence);
-                    array_shift($j);
                     continue;
                 }
-                else if ($j[0] == "pw" && sizeof($sequence) >= 2)   // s1 ^ s2
+                else if ($t == "00010" && sizeof($sequence) >= 2)   // s1 ^ s2
                     $this->sigma[] = $this->power_rule(array_slice($sequence,0,2));
-                else if ($j[0] == "pr")   // s1 * s2
+                else if ($t == "00011")   // s1 * s2
                 {
                     $this->sigma[] = $this->product_rule($sequence[0]);
                     array_shift($sequence);
-                    array_shift($j);
                     continue;
                 }
-                else if ($j[0] == "qr")   // s1 / s2
+                else if ($t == "00100")   // s1 / s2
                 {
                     $this->sigma[] = $this->quotient_rule($sequence[0]);
                     array_shift($sequence);
-                    array_shift($j);
                     continue;
                 }
-                else if ($j[0] == "cr")   // s1 * s2
+                else if ($t == "00101")   // s1 * s2
                 {
                     $this->sigma[] = $this->chain_rule($sequence[0]);
                     array_shift($sequence);
-                    array_shift($j);
                     continue;
                 }
-                else if ($j[0] == "p")   // ^2
+                else if ($t == "00110")   // ^2
                     $this->sigma[] = pow($sequence[0], $sequence[1]);
-                else if ($j[0] == "a")   // s1 + s2
+                else if ($t == "00111")   // s1 + s2
                     $this->sigma[] = (float)($sequence[0] + $sequence[1]);
-                else if ($j[0] == "s")   // s1 - s2
+                else if ($t == "01000")   // s1 - s2
                     $this->sigma[] = (float)($sequence[0] - $sequence[1]);
-                else if ($j[0] == "m")   // s1 * s2
+                else if ($t == "01001")   // s1 * s2
                     $this->sigma[] = (float)($sequence[0] * $sequence[1]);
-                else if ($j[0] == "d" && $sequence[1] != 0)   // s1 / s2
+                else if ($t == "01010" && $sequence[1] != 0)   // s1 / s2
                     $this->sigma[] = (float)($sequence[0] / $sequence[1]);
-                else if ($j[0] == "ch")   // s1 + s2
+                else if ($t == "01011")   // s1 + s2
                     $this->condition += $sequence[0] > $sequence[1];
-                else if ($j[0] == "cl")   // s1 - s2
+                else if ($t == "01100")   // s1 - s2
                     $this->condition += $sequence[0] < $sequence[1];
-                else if ($j[0] == "che")   // s1 * s2
+                else if ($t == "01101")   // s1 * s2
                     $this->condition += $sequence[0] >= $sequence[1];
-                else if ($j[0] == "cle")   // s1 / s2
+                else if ($t == "01110")   // s1 / s2
                     $this->condition += $sequence[0] <= $sequence[1];
-                else if ($j[0] == "cne")   // s1 - s2
+                else if ($t == "01111")   // s1 - s2
                     $this->condition += $sequence[0] != $sequence[1];
-                else if ($j[0] == "ce")   // s1 * s2
+                else if ($t == "10000")   // s1 * s2
                     $this->condition += $sequence[0] == $sequence[1];
-                else if ($j[0] == "gf")   // s1 + s2
-                    return $this->get_f_of((float)$sequence[0]);
-                else if ($j[0] == "gg")
-                    return $this->get_g_of((float)$sequence[0]);
-                array_shift($j);
+                else if ($t == "10001")   // s1 + s2
+                    return $this->set_f_of((string)$sequence[0]);
+                else if ($t == "10010")
+                    return $this->set_g_of((string)$sequence[0]);
                 array_shift($sequence);
                 array_shift($sequence);
             }
@@ -306,7 +307,7 @@
             
             // f'(x)                // f(x)
             $tmp_f = (float)($this->get_f_of($tmp_g));
-            
+
             $tmp_ff = ($this->get_f_of($tmp_f));
             $tmp_gg = ($this->get_g_of($tmp_f));
 
