@@ -109,17 +109,17 @@
             return;
         }
 
+        /**
+         * use a space between each binary command
+         */
         public function _n(string $j, array $sequence)
         {
-            if (strlen($j)%5 != 0)
+            $j = explode(" ", $j);
+            
+            while (count($j) > 0)
             {
-                $this->msg(0, "Command length in bits is not mod 5.");
-                return;
-            }
-            while (strlen($j) > 0)
-            {
-                $t = substr($j,0,5);
-                $j = substr($j,5);
+                $t = $j[0];
+                array_shift($j);
                 if ($t == "00000")   // s1 * s2 
                 {
                     $this->sigma[] = $this->sum_rule($sequence[0]);
@@ -163,21 +163,22 @@
                 else if ($t == "01010" && $sequence[1] != 0)   // s1 / s2
                     $this->sigma[] = (float)($sequence[0] / $sequence[1]);
                 else if ($t == "01011")   // s1 + s2
-                    $this->condition += $sequence[0] > $sequence[1];
+                    $this->condition .= ($sequence[0] > $sequence[1]) ? 1 : 0;
                 else if ($t == "01100")   // s1 - s2
-                    $this->condition += $sequence[0] < $sequence[1];
+                    $this->condition .= ($sequence[0] < $sequence[1]) ? 1 : 0;
                 else if ($t == "01101")   // s1 * s2
-                    $this->condition += $sequence[0] >= $sequence[1];
+                    $this->condition .= ($sequence[0] >= $sequence[1]) ? 1 : 0;
                 else if ($t == "01110")   // s1 / s2
-                    $this->condition += $sequence[0] <= $sequence[1];
+                    $this->condition .= ($sequence[0] <= $sequence[1]) ? 1 : 0;
                 else if ($t == "01111")   // s1 - s2
-                    $this->condition += $sequence[0] != $sequence[1];
-                else if ($t == "10000")   // s1 * s2
-                    $this->condition += $sequence[0] == $sequence[1];
-                else if ($t == "10001")   // s1 + s2
-                    return $this->set_f_of((string)$sequence[0]);
-                else if ($t == "10010")
-                    return $this->set_g_of((string)$sequence[0]);
+                    $this->condition .= ($sequence[0] != $sequence[1]) ? 1 : 0;
+                else if ($t == "10001")   // s1 && s2
+                    $this->condition .= ((bool)substr($this->condition,-1) && $sequence[0] == $sequence[1]) ? 1 : 0;
+                else if ($t == "10010")   // s1 || s2
+                    $this->condition .= ((bool)substr($this->condition,-1) || $sequence[0] == $sequence[1]) ? 1 : 0;
+                else if ($t == "10011")   // s1 ^ s2
+                    $this->condition .= ((bool)substr($this->condition,-1) ^ $sequence[0] == $sequence[1]) ? 1 : 0;
+                else if ()
                 array_shift($sequence);
                 array_shift($sequence);
             }
@@ -245,8 +246,8 @@
         */
         public function sum_rule(int $sequence)
         {
-            $tmp1 = $this->get_f_of((int)$sequence);
-            $tmp2 = $this->get_g_of((int)$sequence);
+            $tmp1 = $this->get_f_of((float)$sequence);
+            $tmp2 = $this->get_g_of((float)$sequence);
 
             return $tmp1 + $tmp2;
         }
@@ -258,8 +259,8 @@
         */
         public function diff_rule(int $sequence)
         {
-            $tmp1 = $this->get_f_of((int)$sequence);
-            $tmp2 = $this->get_g_of((int)$sequence);
+            $tmp1 = $this->get_f_of((float)$sequence);
+            $tmp2 = $this->get_g_of((float)$sequence);
             
             return $tmp1 - $tmp2;
         }
@@ -285,9 +286,9 @@
         {
 
             // f'(x)                // f(x)
-            $tmp_f = $this->get_f_of((int)$sequence);
+            $tmp_f = $this->get_f_of((float)$sequence);
             // g'(x)                // g(x)
-            $tmp_g = $this->get_g_of((int)$sequence);
+            $tmp_g = $this->get_g_of((float)$sequence);
             
             $tmp_ff = $this->get_f_of((float)$tmp_f);
             $tmp_gg = $this->get_g_of((float)$tmp_g);
@@ -324,8 +325,8 @@
         public function quotient_rule(int $sequence)
         {
 
-            $tmp_f = (float)$this->get_f_of((int)$sequence);
-            $tmp_g = (float)$this->get_g_of((int)$sequence);
+            $tmp_f = (float)$this->get_f_of((float)$sequence);
+            $tmp_g = (float)$this->get_g_of((float)$sequence);
 
             $tmp_ff = (float)$this->get_f_of($tmp_f);
             $tmp_gg = (float)$this->get_g_of($tmp_g);

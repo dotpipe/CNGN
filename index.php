@@ -10,12 +10,12 @@ $string = $x->stringParse($string);
 echo $string . " " . sizeof($x->vars);
 $x->add_vars(3);
 echo "\n" . sizeof($x->vars);
-$j = "0010110010";
+$j = "00101 01101 00111 10000";
 $x->set_f_of('3 - 5 + {x}');
 $x->set_g_of('1 + {x} + 10');
-$seq = [10, 4];
+$seq = [5, 10, 30, 25, 40, 100, 100];
 $x->_n($j, $seq);
 
 echo " " . $x->sigma[0];
-
+echo "\n" . $x->condition;
 ?>
