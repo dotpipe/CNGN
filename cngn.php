@@ -19,15 +19,15 @@
             $this->register_vars($index_cnt);
         }
 
-        public function string_replace($replacements, $template) {
+        public function string_replace_x($replacements, $template) {
             return preg_replace_callback('/{(.+?)}/',
                      function($matches) use ($replacements) {
                 return $replacements[$matches[1]];
             }, $template);
         }
 
-        public function string_replace_f($replacements, $template) {
-            return preg_replace_callback('/fn{(.+?)}/',
+        public function string_replace_n($replacements, $template) {
+            return preg_replace_callback('/{z(.+?)}/',
                      function($matches) use ($replacements) {
                 return $replacements[$matches[1]];
             }, $template);
@@ -43,21 +43,11 @@
             return;
         }
 
-        public function load_formula(array $placements) : void
-        {
-            foreach ($placements as $k => $v)
-            {
-                $hex = dechex($k);
-                $this->x_of[$hex] = $v;
-            }
-            return;
-        }
-
         public function load_fn_x(array $placements) : void
         {
             foreach ($placements as $k => $v)
             {
-                $hex = 'x' . dechex($k);
+                $hex = dechex($k);
                 $this->fn_x[$hex] = $v;
             }
             return;
@@ -79,19 +69,8 @@
             $x = 0;
             while ($x < $index_cnt)
             {
-                $hex = 'x' . dechex($x);
-                $this->fn_x[$hex] = false;
-                $x++;
-            }
-        }
-
-        public function register_formula($index_cnt)
-        {
-            $x = 0;
-            while ($x < $index_cnt)
-            {
                 $hex = dechex($x);
-                $this->x_of[$hex] = false;
+                $this->fn_x[$hex] = false;
                 $x++;
             }
         }
@@ -108,25 +87,13 @@
             } while ($s < $x + $index_cnt);
         }
 
-        public function add_formula(int $index_cnt)
-        {
-            $x = count($this->x_of);
-            $s = $x;
-            do
-            {
-                $hex = dechex($s);
-                $this->x_of[$hex] = false;
-                $s++;
-            } while ($s < $x + $index_cnt);
-        }
-
         public function add_fn_x(int $index_cnt)
         {
             $x = count($this->fn_x);
             $s = $x;
             do
             {
-                $hex = 'x' . dechex($s);
+                $hex = dechex($s);
                 $this->fn_x[$hex] = false;
                 $s++;
             } while ($s < $x + $index_cnt);
@@ -146,17 +113,15 @@
                 return false;
             }
             $string = $formula;
-            $x = 0;
+            while (strpos($string, "{z") !== false)
+            {
+                $string = $this->string_replace_n($this->vars, $string);
+                echo json_encode($string);
+            }
             while (strpos($string, "{x") !== false)
             {
-                $string = $this->stringParse($string, $this->fn_x);
-                $x++;
-            } 
-            $x = 0;
-            while (strpos($string, "fn{") !== false)
-            {
-                $string = $this->string_replace_f($this->fn_x, $string);
-                $x++;
+                $string = $this->stringParse($string, $this->vars);
+                echo json_encode($string);
             }
             return eval("return $string;");
         }
@@ -167,18 +132,16 @@
         * and replace with $vars values 
         * 
         */
-        public function stringParse(string $string, array $vars)
+        public function stringParse(string $string)
         {
             if ($string == "")
             {
                 $this->msg(0, 'Empty string given, try stringParse(string)\n\tUse a valid {x00} to place the variable\n\tThese are keys in $vars');
                 return false;
             }
-            $x = 0;
             while (strpos($string, "{x") !== false)
             {
-                $string = $this->string_replace($vars, $string);
-                $x++;
+                $string = $this->string_replace_x($this->vars, $string);
             }
             return $string;
         }
@@ -355,7 +318,7 @@
                 exit(0);
             }
             $arry = array("x" => $x);
-            $v = ($this->string_replace($arry, $this->f));
+            $v = ($this->string_replace_x($arry, $this->f));
             return eval("return $v;");
         }
 
@@ -382,7 +345,7 @@
                 exit(0);
             }
             $arry = array("x" => $x);
-            $v = ($this->string_replace($arry, $this->g));
+            $v = ($this->string_replace_x($arry, $this->g));
 
             return eval("return $v;");
         }
