@@ -93,9 +93,12 @@
         }
 
         /**
+         * the X function. Because the other letters are dumb.
+         * 
          * use a space between each binary command
+         * 
          */
-        public function _n(string $j, array $sequence)
+        public function x(string $j, array $sequence)
         {
             $j = explode(" ", $j);
             
@@ -193,11 +196,43 @@
                     $this->condition .= ((bool)substr($this->condition,-1) ^ $sequence[0] >= $sequence[1]);
                 else if ($t == "100010")   // s1 ^ s2
                     $this->condition .= ((bool)substr($this->condition,-1) ^ $sequence[0] <= $sequence[1]);
+                else if ($t == "100011")
+                {
+                    $this->sigma[] = $this->mathFact($sequence[0]);
+                    array_shift($sequence);
+                    continue;
+                }
+                else if ($t == "100100")   // ln()
+                {
+                    $this->sigma[] = log($sequence[0]);
+                    array_shift($sequence);
+                    continue;
+                }
+                else if ($t == "100101")   // log_base()
+                    $this->sigma[] = log($sequence[0], $sequence[1]);
                 array_shift($sequence);
                 array_shift($sequence);
             }
         }
 
+        /**
+         * 
+         * Factorials
+         * 
+         */
+        function mathFact( $s )
+        {
+            $r = (int) $s;
+
+            if ( $r < 2 )
+                $r = 1;
+            else {
+                for ( $i = $r-1; $i > 1; $i-- )
+                    $r = $r * $i;
+            }
+
+            return( $r );
+        }
         /*
         *
         * get function of g() -- Use {x} wherever you need your variable

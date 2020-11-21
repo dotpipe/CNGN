@@ -10,11 +10,11 @@ $string = $x->stringParse($string);
 echo $string . " ";
 $x->add_vars(3);
 // quotient rule, divide, >=, $s1 || $s2 
-$j = "000100 001010 001101 100010";
+$j = "000100 001010 001101 100100";
 $x->set_f_of('1 - 3 + {x}');
 $x->set_g_of('1 + {x} + 20');
 $seq = [6, 10, 35, 30, 10, 4, 5];
-$x->_n($j, $seq);
+$x->x($j, $seq);
 
 echo " " . json_encode($x->sigma);
 $x->sigma = [];
