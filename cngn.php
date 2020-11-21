@@ -1,7 +1,5 @@
 <?php
 
-    //namespace CNGN;
-
     class CNGN {
 
         public $FO = [];
@@ -9,11 +7,13 @@
         public $condition = "";
         public $results = [];
         public $messages = [];
+        public $x_of = [];
+        public $fn_x = [];
         public $f = "";
         public $g = "";
         public $vars;
 
-        function __construct($index_cnt)
+        function __construct(int $index_cnt)
         {
             $this->messages[] = "Error: " ;
             $this->register_vars($index_cnt);
@@ -21,6 +21,13 @@
 
         public function string_replace($replacements, $template) {
             return preg_replace_callback('/{(.+?)}/',
+                     function($matches) use ($replacements) {
+                return $replacements[$matches[1]];
+            }, $template);
+        }
+
+        public function string_replace_f($replacements, $template) {
+            return preg_replace_callback('/fn{(.+?)}/',
                      function($matches) use ($replacements) {
                 return $replacements[$matches[1]];
             }, $template);
@@ -36,6 +43,26 @@
             return;
         }
 
+        public function load_formula(array $placements) : void
+        {
+            foreach ($placements as $k => $v)
+            {
+                $hex = dechex($k);
+                $this->x_of[$hex] = $v;
+            }
+            return;
+        }
+
+        public function load_fn_x(array $placements) : void
+        {
+            foreach ($placements as $k => $v)
+            {
+                $hex = 'x' . dechex($k);
+                $this->fn_x[$hex] = $v;
+            }
+            return;
+        }
+
         public function register_vars($index_cnt)
         {
             $x = 0;
@@ -43,6 +70,28 @@
             {
                 $hex = 'x' . dechex($x);
                 $this->vars[$hex] = false;
+                $x++;
+            }
+        }
+
+        public function register_fn_x($index_cnt)
+        {
+            $x = 0;
+            while ($x < $index_cnt)
+            {
+                $hex = 'x' . dechex($x);
+                $this->fn_x[$hex] = false;
+                $x++;
+            }
+        }
+
+        public function register_formula($index_cnt)
+        {
+            $x = 0;
+            while ($x < $index_cnt)
+            {
+                $hex = dechex($x);
+                $this->x_of[$hex] = false;
                 $x++;
             }
         }
@@ -59,23 +108,76 @@
             } while ($s < $x + $index_cnt);
         }
 
+        public function add_formula(int $index_cnt)
+        {
+            $x = count($this->x_of);
+            $s = $x;
+            do
+            {
+                $hex = dechex($s);
+                $this->x_of[$hex] = false;
+                $s++;
+            } while ($s < $x + $index_cnt);
+        }
+
+        public function add_fn_x(int $index_cnt)
+        {
+            $x = count($this->fn_x);
+            $s = $x;
+            do
+            {
+                $hex = 'x' . dechex($s);
+                $this->fn_x[$hex] = false;
+                $s++;
+            } while ($s < $x + $index_cnt);
+        }
+
         /*
         *
         * Parse string of {xFA} x-hex values
         * and replace with $vars values 
         * 
         */
-        public function stringParse(string $string)
+        public function mathParse(string $formula)
+        {
+            if ($formula == "")
+            {
+                $this->msg(0, 'Empty string given, try mathParse(string)\n\tUse a valid {x00} to place the variable\n\tThese are keys in $vars');
+                return false;
+            }
+            $string = $formula;
+            $x = 0;
+            while (strpos($string, "{x") !== false)
+            {
+                $string = $this->stringParse($string, $this->fn_x);
+                $x++;
+            } 
+            $x = 0;
+            while (strpos($string, "fn{") !== false)
+            {
+                $string = $this->string_replace_f($this->fn_x, $string);
+                $x++;
+            }
+            return eval("return $string;");
+        }
+
+        /*
+        *
+        * Parse string of {xFA} x-hex values
+        * and replace with $vars values 
+        * 
+        */
+        public function stringParse(string $string, array $vars)
         {
             if ($string == "")
             {
-                $this->msg(0, 'Empty string given, try string_parse(string)\n\tUse a valid {x00} to place the variable\n\tThese are keys in $vars');
+                $this->msg(0, 'Empty string given, try stringParse(string)\n\tUse a valid {x00} to place the variable\n\tThese are keys in $vars');
                 return false;
             }
             $x = 0;
             while (strpos($string, "{x") !== false)
             {
-                $string = $this->string_replace($this->vars, $string);
+                $string = $this->string_replace($vars, $string);
                 $x++;
             }
             return $string;
@@ -372,6 +474,7 @@
 
             return $tmp_ff * $tmp_gg;
         }
+
 
         /*
         *
