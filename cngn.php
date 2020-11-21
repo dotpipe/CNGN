@@ -162,41 +162,41 @@
                     $this->condition .= ($sequence[0] == $sequence[1]);
                 else if ($t == "010001")   // s1 && s2
                     $this->condition .= ((bool)substr($this->condition,-1) && $sequence[0] == $sequence[1]);
-                else if ($t == "010010")   // s1 || s2
+                else if ($t == "010010")   // s1 && s2
                     $this->condition .= ((bool)substr($this->condition,-1) && $sequence[0] != $sequence[1]);
-                else if ($t == "010011")   // s1 ^ s2
+                else if ($t == "010011")   // s1 && s2
                     $this->condition .= ((bool)substr($this->condition,-1) && $sequence[0] > $sequence[1]);
                 else if ($t == "010100")   // s1 && s2
                     $this->condition .= ((bool)substr($this->condition,-1) && $sequence[0] < $sequence[1]);
-                else if ($t == "010101")   // s1 || s2
+                else if ($t == "010101")   // s1 && s2
                     $this->condition .= ((bool)substr($this->condition,-1) && $sequence[0] >= $sequence[1]);
-                else if ($t == "010110")   // s1 ^ s2
+                else if ($t == "010110")   // s1 && s2
                     $this->condition .= ((bool)substr($this->condition,-1) && $sequence[0] <= $sequence[1]);
-                else if ($t == "010111")   // s1 && s2
+                else if ($t == "010111")   // s1 || s2
                     $this->condition .= ((bool)substr($this->condition,-1) || $sequence[0] == $sequence[1]);
                 else if ($t == "011000")   // s1 || s2
                     $this->condition .= ((bool)substr($this->condition,-1) || $sequence[0] != $sequence[1]);
-                else if ($t == "011001")   // s1 ^ s2
+                else if ($t == "011001")   // s1 || s2
                     $this->condition .= ((bool)substr($this->condition,-1) || $sequence[0] > $sequence[1]);
-                else if ($t == "011010")   // s1 && s2
+                else if ($t == "011010")   // s1 || s2
                     $this->condition .= ((bool)substr($this->condition,-1) || $sequence[0] < $sequence[1]);
                 else if ($t == "011011")   // s1 || s2
                     $this->condition .= ((bool)substr($this->condition,-1) || $sequence[0] >= $sequence[1]);
-                else if ($t == "011100")   // s1 ^ s2
+                else if ($t == "011100")   // s1 || s2
                     $this->condition .= ((bool)substr($this->condition,-1) || $sequence[0] <= $sequence[1]);
-                else if ($t == "011101")   // s1 && s2
+                else if ($t == "011101")   // s1 ^ s2
                     $this->condition .= ((bool)substr($this->condition,-1) ^ $sequence[0] == $sequence[1]);
-                else if ($t == "011110")   // s1 || s2
+                else if ($t == "011110")   // s1 ^ s2
                     $this->condition .= ((bool)substr($this->condition,-1) ^ $sequence[0] != $sequence[1]);
                 else if ($t == "011111")   // s1 ^ s2
                     $this->condition .= ((bool)substr($this->condition,-1) ^ $sequence[0] > $sequence[1]);
-                else if ($t == "100000")   // s1 && s2
+                else if ($t == "100000")   // s1 ^ s2
                     $this->condition .= ((bool)substr($this->condition,-1) ^ $sequence[0] < $sequence[1]);
-                else if ($t == "100001")   // s1 || s2
+                else if ($t == "100001")   // s1 ^ s2
                     $this->condition .= ((bool)substr($this->condition,-1) ^ $sequence[0] >= $sequence[1]);
                 else if ($t == "100010")   // s1 ^ s2
                     $this->condition .= ((bool)substr($this->condition,-1) ^ $sequence[0] <= $sequence[1]);
-                else if ($t == "100011")
+                else if ($t == "100011")    // factorial
                 {
                     $this->sigma[] = $this->mathFact($sequence[0]);
                     array_shift($sequence);
@@ -204,12 +204,19 @@
                 }
                 else if ($t == "100100")   // ln()
                 {
+                    $this->sigma[] = exp($sequence[0]);
+                    array_shift($sequence);
+                    continue;
+                }
+                else if ($t == "100101")   // ln()
+                {
                     $this->sigma[] = log($sequence[0]);
                     array_shift($sequence);
                     continue;
                 }
-                else if ($t == "100101")   // log_base()
+                else if ($t == "100110")   // log_base()
                     $this->sigma[] = log($sequence[0], $sequence[1]);
+
                 array_shift($sequence);
                 array_shift($sequence);
             }
