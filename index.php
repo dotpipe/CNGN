@@ -19,13 +19,15 @@ $seq = [6, 10, 35, 30, 10, 4, 5];
 $x->x($j, $seq);
 
 $x->register_fn_x(2);
-$seq = ["0 - 3 + {x5}", 22, 35, 30, 10, 4, 5];
+$seq = ["{x2} + {x5}", 22, "{x1} + 3", 30, 10, 4, 5];
 $x->load_vars($seq);
-$x->load_fn_x(["{x0} - {x3}", "5 + {x1}"]);
+$f = [45, 62];
+$x->load_fn_x(["{x0} ", "{x5} {c011001} {x2} +  {x3} + 5 + {x1}"]);
 echo json_encode($x->fn_x);
-$x->sigma = $x->mathParse($x->fn_x[0]);
-//$m = eval("return ".$x->sigma)
-echo " " . ($x->sigma);
-$x->sigma = [];
-echo "\n" . $x->condition;
+//$t = $x->mathParse($x->fn_x[0], $f);
+//echo "\n" . $t;
+$t = $x->mathParse($x->fn_x[1], $f);
+//$m = eval("return ".$x->sigma);
+echo "\n\r" . $t;
+echo "\n\r" . $x->condition;
 ?>
