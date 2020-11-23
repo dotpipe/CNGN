@@ -24,10 +24,10 @@ $f = [40, 62];
 $x->load_fn_x(["{x0}", "{x5} * {c010011} - {x2} +  {x3} + 5 + {x1}"]);
 echo json_encode($x->fn_x);
 $t = $x->mathParse($x->fn_x[0], $f);
-echo "\**********" . $t;
+echo " " . $t;
 
 $t = $x->mathParse($x->fn_x[1], $f);
 //$m = eval("return ".$x->sigma);
-echo "\n\rMMM" . $t;
+echo "\n\r" . $t;
 echo "\n\r" . $x->condition;
 ?>

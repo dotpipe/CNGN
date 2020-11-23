@@ -38,7 +38,6 @@
             $this->seq = $sequence;
             return preg_replace_callback('/{c(.+?)}/',
                      function($matches) {
-                         echo json_encode($matches);
                 return $this->x($matches[1]);
             }, $template);
         }
@@ -131,7 +130,6 @@
                 $string;
             }
             // Parse {x00}
-            echo $string;
             return eval("return $string;");
         }
 
@@ -288,7 +286,7 @@
                 else if ($t == "110111")   // log_base()
                 {    return log((float)$this->seq[0], (float)$this->seq[1]); }
                 else if ($t == "111000")   // integral
-                {    return $this->integral((float)$this->seq[0], (float)$this->seq[1], (float)$this->seq[2]); }
+                {    return $this->integral((float)$this->seq[0], (float)$this->seq[1], (float)$this->seq[2], (float) $this->seq[3]); }
             }
             if (strlen($this->sigma) > 0)
                 return eval("return $this->sigma;");
@@ -299,14 +297,18 @@
          * Integral (width, incise, height)
          * 
          */
-
-        public function integral(float $secant, float $incise, float $height)
+        public function integral(float $secant, float $incise, float $height, float $integrand = 0.5)
         {
             $midpoint = $secant/2; 
             $midheight = $height - $incise;
             $perimeter = ($midpoint * 2) + ($midheight * 2);
             $length = $perimeter / 2;
-            $length += $midheight / 2;
+            if ($integrand > 0.99999999 || $integrand < 1.0e-8)
+            {
+                $this->msg(0, "Integrand is x > 1 or x < 0");
+                return 0;
+            }
+            $length += $midheight * $integrand;
             return $length;
         }
 
@@ -342,7 +344,6 @@
             }
             $arry = array($x);
             $v = ($this->stringParse($this->f));
-            echo $v;
             return eval("return $v;");
         }
 
