@@ -27,7 +27,7 @@ $t = $x->mathParse($x->fn_x[0], $f);
 echo " " . $t;
 
 $t = $x->mathParse($x->fn_x[1], $f);
-//$m = eval("return ".$x->sigma);
 echo "\n\r" . $t;
 echo "\n\r" . $x->condition;
+
 ?>
