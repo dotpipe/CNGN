@@ -303,7 +303,6 @@
             $midheight = $height - $incise;
             $perimeter = ($midpoint * 2) + ($midheight * 2);
             $length = $perimeter / 2;
-            
             $length += $midheight * 0.5;
             return $length;
         }
