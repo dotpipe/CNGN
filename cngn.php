@@ -297,10 +297,10 @@
          * Integral (width, incise, height)
          * 
          */
-        public function integral(float $secant, float $incise, float $height)
+        public function integral(float $secant, float $y, float $height)
         {
             $midpoint = $secant/2; 
-            $midheight = $height - $incise;
+            $midheight = abs($height - $y);
             $perimeter = ($midpoint * 2) + ($midheight * 2);
             $length = $perimeter / 2;
             $length += $midheight * 0.5;
