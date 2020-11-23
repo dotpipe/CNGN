@@ -11,9 +11,9 @@
  * 000011 = Sine
  * 000100 = Hyperbolic Tangent
  * 000101 = Tangent
- * 000110 = 1 / Sine(x)
- * 000111 = 1 / Cosine(x)
- * 001000 = 1 / Tangent(x)
+ * 000110 = Secant
+ * 000111 = Cosecant
+ * 001000 = Cotangent
  * 001001 = ArcSine(x)
  * 001010 = ArcCosine(x)
  * 001011 = ArcTangent(x)

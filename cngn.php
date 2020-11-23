@@ -297,18 +297,14 @@
          * Integral (width, incise, height)
          * 
          */
-        public function integral(float $secant, float $incise, float $height, float $integrand = 0.5)
+        public function integral(float $secant, float $incise, float $height)
         {
             $midpoint = $secant/2; 
             $midheight = $height - $incise;
             $perimeter = ($midpoint * 2) + ($midheight * 2);
             $length = $perimeter / 2;
-            if ($integrand > 0.99999999 || $integrand < 1.0e-8)
-            {
-                $this->msg(0, "Integrand is x > 1 or x < 0");
-                return 0;
-            }
-            $length += $midheight * $integrand;
+            
+            $length += $midheight * 0.5;
             return $length;
         }
 
