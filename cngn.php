@@ -296,7 +296,7 @@
 
         /**
          * 
-         * Integral (width, height, degrees)
+         * Integral (width, incise, height)
          * 
          */
 

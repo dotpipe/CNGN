@@ -73,6 +73,7 @@
  * 110101 = e^x
  * 110110 = ln(x)
  * 110111 = log_y(x) (x,y)
+ * 111000 = integral (x,y,z) (read the function)
  * 
  */
 
