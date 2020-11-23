@@ -232,53 +232,53 @@
                 else if ($t == "011010")   // $s / $s2
                 {    return " / "; }
                 else if ($t == "011100")   // s1 > s2
-                {    return ((float)$this->seq[0] > $this->sequence[1]); }
+                {    return ((float)$this->seq[0] > $this->seq[1]); }
                 else if ($t == "011101")   // s1 < s2
-                {    return ((float)$this->seq[0] < $this->sequence[1]); }
+                {    return ((float)$this->seq[0] < $this->seq[1]); }
                 else if ($t == "011110")   // s1 * s2
-                {    return ((float)$this->seq[0] >= $this->sequence[1]); }
+                {    return ((float)$this->seq[0] >= $this->seq[1]); }
                 else if ($t == "011111")   // s1 >= s2
-                {    return ((float)$this->seq[0] <= $this->sequence[1]); }
+                {    return ((float)$this->seq[0] <= $this->seq[1]); }
                 else if ($t == "100000")   // s1 != s2
-                {    return ((float)$this->seq[0] != $this->sequence[1]); }
+                {    return ((float)$this->seq[0] != $this->seq[1]); }
                 else if ($t == "100001")   // s1 != s2
-                {    return ((float)$this->seq[0] == $this->sequence[1]); }
+                {    return ((float)$this->seq[0] == $this->seq[1]); }
                 else if ($t == "100010")   // s1 && s2
-                {    return ((bool)substr($this->condition,-1) && $this->sequence[0] == $this->sequence[1]); }
+                {    return ((bool)substr($this->condition,-1) && $this->seq[0] == $this->seq[1]); }
                 else if ($t == "100011")   // s1 && s2
-                {    return ((bool)substr($this->condition,-1) && $this->sequence[0] != $this->sequence[1]); }
+                {    return ((bool)substr($this->condition,-1) && $this->seq[0] != $this->seq[1]); }
                 else if ($t == "100100")   // s1 && s2
-                {    return ((bool)substr($this->condition,-1) && $this->sequence[0] > $this->sequence[1]); }
+                {    return ((bool)substr($this->condition,-1) && $this->seq[0] > $this->seq[1]); }
                 else if ($t == "100101")   // s1 && s2
-                {    return ((bool)substr($this->condition,-1) && $this->sequence[0] < $this->sequence[1]); }
+                {    return ((bool)substr($this->condition,-1) && $this->seq[0] < $this->seq[1]); }
                 else if ($t == "100110")   // s1 && s2
-                {    return ((bool)substr($this->condition,-1) && $this->sequence[0] >= $this->sequence[1]); }
+                {    return ((bool)substr($this->condition,-1) && $this->seq[0] >= $this->seq[1]); }
                 else if ($t == "100111")   // s1 && s2
-                {    return ((bool)substr($this->condition,-1) && $this->sequence[0] <= $this->sequence[1]); }
+                {    return ((bool)substr($this->condition,-1) && $this->seq[0] <= $this->seq[1]); }
                 else if ($t == "101000")   // s1 || s2
-                {    return ((bool)substr($this->condition,-1) || $this->sequence[0] == $this->sequence[1]); }
+                {    return ((bool)substr($this->condition,-1) || $this->seq[0] == $this->seq[1]); }
                 else if ($t == "101001")   // s1 || s2
-                {    return ((bool)substr($this->condition,-1) || $this->sequence[0] != $this->sequence[1]); }
+                {    return ((bool)substr($this->condition,-1) || $this->seq[0] != $this->seq[1]); }
                 else if ($t == "101010")   // s1 || s2
-                {    return ((bool)substr($this->condition,-1) || $this->sequence[0] > $this->sequence[1]); }
+                {    return ((bool)substr($this->condition,-1) || $this->seq[0] > $this->seq[1]); }
                 else if ($t == "101011")   // s1 || s2
-                {    return ((bool)substr($this->condition,-1) || $this->sequence[0] < $this->sequence[1]); }
+                {    return ((bool)substr($this->condition,-1) || $this->seq[0] < $this->seq[1]); }
                 else if ($t == "101100")   // s1 || s2
-                {    return ((bool)substr($this->condition,-1) || $this->sequence[0] >= $this->sequence[1]); }
+                {    return ((bool)substr($this->condition,-1) || $this->seq[0] >= $this->seq[1]); }
                 else if ($t == "101101")   // s1 || s2
-                {    return ((bool)substr($this->condition,-1) || $this->sequence[0] <= $this->sequence[1]); }
+                {    return ((bool)substr($this->condition,-1) || $this->seq[0] <= $this->seq[1]); }
                 else if ($t == "101110")   // s1 ^ s2
-                {    return ((bool)substr($this->condition,-1) ^ $this->sequence[0] == $this->sequence[1]); }
+                {    return ((bool)substr($this->condition,-1) ^ $this->seq[0] == $this->seq[1]); }
                 else if ($t == "101111")   // s1 ^ s2
-                {    return ((bool)substr($this->condition,-1) ^ $this->sequence[0] != $this->sequence[1]); }
+                {    return ((bool)substr($this->condition,-1) ^ $this->seq[0] != $this->seq[1]); }
                 else if ($t == "110000")   // s1 ^ s2
-                {    return ((bool)substr($this->condition,-1) ^ $this->sequence[0] > $this->sequence[1]); }
+                {    return ((bool)substr($this->condition,-1) ^ $this->seq[0] > $this->seq[1]); }
                 else if ($t == "110001")   // s1 ^ s2
-                {    return ((bool)substr($this->condition,-1) ^ $this->sequence[0] < $this->sequence[1]); }
+                {    return ((bool)substr($this->condition,-1) ^ $this->seq[0] < $this->seq[1]); }
                 else if ($t == "110010")   // s1 ^ s2
-                {    return ((bool)substr($this->condition,-1) ^ $this->sequence[0] >= $this->sequence[1]); }
+                {    return ((bool)substr($this->condition,-1) ^ $this->seq[0] >= $this->seq[1]); }
                 else if ($t == "110011")   // s1 ^ s2
-                {    return ((bool)substr($this->condition,-1) ^ $this->sequence[0] <= $this->sequence[1]); }
+                {    return ((bool)substr($this->condition,-1) ^ $this->seq[0] <= $this->seq[1]); }
                 else if ($t == "110100")    // factorial
                 {    return $this->mathFact((float)$this->seq[0]); }
                 else if ($t == "110101")   // ln()
@@ -286,10 +286,28 @@
                 else if ($t == "110110")   // ln()
                 {    return log((float)$this->seq[0]); }
                 else if ($t == "110111")   // log_base()
-                {    return log((float)$this->seq[0], (float)$this->sequence[1]); }
+                {    return log((float)$this->seq[0], (float)$this->seq[1]); }
+                else if ($t == "111000")   // integral
+                {    return $this->integral((float)$this->seq[0], (float)$this->seq[1], (float)$this->seq[2]); }
             }
             if (strlen($this->sigma) > 0)
                 return eval("return $this->sigma;");
+        }
+
+        /**
+         * 
+         * Integral (width, height, degrees)
+         * 
+         */
+
+        public function integral(float $secant, float $incise, float $height)
+        {
+            $midpoint = $secant/2; 
+            $midheight = $height - $incise;
+            $perimeter = ($midpoint * 2) + ($midheight * 2);
+            $length = $perimeter / 2;
+            $length += $midheight / 2;
+            return $length;
         }
 
         /**
@@ -443,7 +461,6 @@
 
             return $tmp_ff * $tmp_gg;
         }
-
 
         /*
         *
