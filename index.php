@@ -20,7 +20,7 @@ $x->register_fn_x(2);
 $seq = ["{x2} + {x6}", 22, "{x1} + 3", 30, [10, 11, -2], 4, 5];
 $x->load_vars($seq);
 //               don't sweat this, 011001 is the code for 'return *';
-$x->load_fn_x(["{x0}", "{x5} * {c110010,0} - {x2} +  {x3} + 5 + {x1}"]);
+$x->load_fn_x(["{x0}", "{x5} {c011001,0} - {x2} +  {x3} + 5 + {x1}"]);
 echo "<br>". json_encode($x->fn_x);
 $t = $x->mathParse($x->fn_x[1], $x->vars);
 echo "<br>" . $t;
