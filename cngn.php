@@ -285,25 +285,59 @@
                 {    return log((float)$this->seq[0]); }
                 else if ($t == "110111")   // log_base()
                 {    return log((float)$this->seq[0], (float)$this->seq[1]); }
-                else if ($t == "111000")   // integral
-                {    return $this->integral((float)$this->seq[0], (float)$this->seq[1], (float)$this->seq[2], (float) $this->seq[3]); }
+                else if ($t == "111000")   // integrand
+                {    return $this->integrand((float)$this->seq[0], (float)$this->seq[1], (float)$this->seq[2], (float) $this->seq[3]); }
+                else if ($t == "111001")   // integral // Make seq[0] a subarray & seq[1] the average height of perimeter 
+                {    return $this->integral($this->seq[0], (float)$this->seq[1]); }
+                else if ($t == "111010")   // integral // Make seq[0] a subarray & seq[1] the average height of perimeter 
+                {    return $this->find_integral($this->seq); }
             }
             if (strlen($this->sigma) > 0)
                 return eval("return $this->sigma;");
         }
 
+        public function integral(array $sequence, float $avg_height)
+        {
+            $length = array_sum($sequence) / count($sequence);
+            return ($length * 2) + ($avg_height * 2);
+        }
+
         /**
          * 
-         * Integral (width, incise, height)
+         * Integrand [[width, y, height],[w,y,h]...]
          * 
          */
-        public function integral(float $secant, float $y, float $height)
+        public function find_integral(array $sequence)
+        {
+            $h = [];
+            $sum = [];
+            foreach ($sequence as $k => $v)
+            {
+                $midpoint = $v[0] /2; 
+                $incise = abs($v[2] - $v[1]);
+                $perimeter = ($midpoint * 2) + ($incise * 2);
+                $length = $perimeter / 2;
+                $length += $incise / 2;
+                $sum [] = $length;
+                $h [] = $v[2];
+            }
+            $integral = $this->integral($sum, array_sum($h) / count($h));
+            return $integral;
+        }
+
+        /**
+         * 
+         * Integrand (width, y, height)
+         * 
+         */
+        public function integrand(float $secant, float $y, float $height)
         {
             $midpoint = $secant/2; 
             $incise = abs($height - $y);
             $perimeter = ($midpoint * 2) + ($incise * 2);
             $length = $perimeter / 2;
-            $length += $incise * 0.5;
+            $length += $incise / 2;
+
             return $length;
         }
 
@@ -322,9 +356,9 @@
                 for ( $i = $r-1; $i > 1; $i-- )
                     $r = $r * $i;
             }
-
-            return( $r );
+            return $r;
         }
+
         /*
         *
         * get function of g() -- Use {x} wherever you need your variable

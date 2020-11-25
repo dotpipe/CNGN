@@ -73,7 +73,9 @@
  * 110101 = e^x
  * 110110 = ln(x)
  * 110111 = log_y(x) (x,y)
- * 111000 = integral (width,y,height) (read the function)
+ * 111000 = integrand (width,y,height) (read the function)
+ * 111001 = integral
+ * 111010 = find_integral ([[width,y,height],[w,y,h], ...])
  * 
  */
 
