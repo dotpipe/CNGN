@@ -299,7 +299,7 @@
         public function integral(array $sequence, float $avg_height)
         {
             $length = array_sum($sequence) / count($sequence);
-            return ($length * 2) + ($avg_height * 2);
+            return ($length * $avg_height);
         }
 
         /**
@@ -314,7 +314,7 @@
             foreach ($sequence as $k => $v)
             {
                 $midpoint = $v[0] /2; 
-                $incise = abs($v[2] - $v[1]);
+                $incise = ($v[2] - $v[1]);
                 $perimeter = ($midpoint * 2) + ($incise * 2);
                 $length = $perimeter / 2;
                 $length += $incise / 2;
