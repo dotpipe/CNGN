@@ -37,7 +37,13 @@
         public function string_replace_b(string &$template, array $sequence) {
             $this->seq = $sequence;
             return preg_replace_callback('/{c(.+?),(.+?)}/',
-                     function($matches) {
+                     function($matches) use ($sequence) {
+                $this->string_replace_x($sequence,$matches[2]);
+                if (!is_numeric($matches[2]))
+                {
+                    $this->msg(0,"There must be 2 parameters to {c}. Example: {c101101,3}.<br>Yours: {c".$matches[1].",".$matches[2]."}");
+                    exit(0);
+                }
                 if (bindec($matches[1]) > 55 && bindec($matches[1]) < 58)
                 {
                         return $this->calculus((string)$matches[1], $this->seq);
@@ -301,6 +307,12 @@
                 {    return log((float)$this->seq[$i]); }
                 else if ($t == "110111")   // log_base()
                 {    return log((float)$this->seq[$i], (float)$this->seq[$i+1]); }
+                else if ($t == "111000")   // integrand()
+                {    return $this->calculus("111000", $this->seq); }
+                else if ($t == "110001")   // integral()
+                {    return $this->calculus("111001", $this->seq); }
+                else if ($t == "110010")   // find_integral()
+                {    return $this->calculus("111010", $this->seq); }
 
             }
             if (strlen($this->sigma) > 0)
