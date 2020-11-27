@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <?php
 
     class CNGN {
@@ -549,3 +550,542 @@
         }
     }
 ?>
+=======
+<?php
+class CNGN
+{
+    public $FO = [];
+    public $sigma = "";
+    public $condition = "";
+    public $results = [];
+    public $messages = [];
+    public $x_of = [];
+    public $fn_x = [];
+    public $f = "";
+    public $g = "";
+    public $vars;
+    public $seq = [];
+    public function __construct(float $index_cnt)
+    {
+        $this->messages[] = "Error: " ;
+        $this->register_vars($index_cnt);
+    }
+
+    public function string_replace_x($replacements, &$template)
+    {
+        $replacements = $this->vars;
+        return preg_replace_callback(
+            '/{x(.+?)}/',
+            function ($matches) use ($replacements) {
+                return $replacements[$matches[1]];
+            },
+            $template
+        );
+    }
+
+    public function string_replace_n($replacements, &$template)
+    {
+        return preg_replace_callback(
+            '/{z(.+?)}/',
+            function ($matches) use ($replacements) {
+                return $replacements[$matches[1]];
+            },
+            $template
+        );
+    }
+
+    public function string_replace_b(string &$template, array $sequence)
+    {
+        $this->seq = $sequence;
+        return preg_replace_callback(
+            '/{c(.+?),(.+?)}/',
+            function ($matches) use ($sequence) {
+                $this->string_replace_x($sequence, $matches[2]);
+                if (!is_numeric($matches[2])) {
+                    $this->msg(0, "There must be 2 parameters to {c}. Example: {c101101,3}.<br>Yours: {c".$matches[1].",".$matches[2]."}");
+                    exit(0);
+                }
+                if (bindec($matches[1]) > 55 && bindec($matches[1]) < 58) {
+                    return $this->calculus((string)$matches[1], $this->seq);
+                } elseif (bindec($matches[1]) == 58) {
+                    if (is_array($this->seq[0])) {
+                        return $this->calculus((string)$matches[1], $this->seq);
+                    } else {
+                        return $this->calculus((string)$matches[1], [$this->seq]);
+                    }
+                }
+                return $this->x((string)$matches[1], (int)trim($matches[2], " "));
+            },
+            $template
+        );
+    }
+
+    public function load_vars(array $placements) : void
+    {
+        foreach ($placements as $k => $v) {
+            $hex = dechex($k);
+            $this->vars[$hex] = $v;
+        }
+        return;
+    }
+
+    public function load_fn_x(array $placements) : void
+    {
+        foreach ($placements as $k => $v) {
+            $hex = dechex($k);
+            $this->fn_x[$hex] = $v;
+        }
+        return;
+    }
+
+    public function register_vars($index_cnt)
+    {
+        $x = 0;
+        while ($x < $index_cnt) {
+            $hex = dechex($x);
+            $this->vars[$hex] = false;
+            $x++;
+        }
+    }
+
+    public function register_fn_x($index_cnt)
+    {
+        $x = 0;
+        while ($x < $index_cnt) {
+            $hex = dechex($x);
+            $this->fn_x[$hex] = false;
+            $x++;
+        }
+    }
+
+    public function add_vars(float $index_cnt)
+    {
+        $x = count($this->vars);
+        $s = $x;
+        do {
+            $hex = dechex($s);
+            $this->vars[$hex] = false;
+            $s++;
+        } while ($s < $x + $index_cnt);
+    }
+
+    public function add_fn_x(float $index_cnt)
+    {
+        $x = count($this->fn_x);
+        $s = $x;
+        do {
+            $hex = dechex($s);
+            $this->fn_x[$hex] = false;
+            $s++;
+        } while ($s < $x + $index_cnt);
+    }
+
+    /**
+     * Parse string of {xFA} x-hex values
+     * and replace with $vars values
+     */
+    public function mathParse(string $formula, array $sequence = [])
+    {
+        if (count($sequence) == 0) {
+            $sequence = $this->vars;
+        }
+        if ($formula == "") {
+            $this->msg(0, 'Empty string given, try mathParse(string)\n\tUse a valid {x00} to place the variable\n\tThese are keys in $vars');
+            return false;
+        }
+        $string = $formula;
+        $x = 0;
+        $string = $this->stringParse($string);
+        // Parse {x00}
+        while (strpos($string, "{c") !== false) {
+            $string = $this->string_replace_b($string, $sequence);
+        }
+        return eval("return $string;");
+    }
+
+    /**
+     * Parse string of {xFA} x-hex values
+     * and replace with $vars values
+     */
+    public function stringParse(string $string)
+    {
+        if ($string == "") {
+            $this->msg(0, 'Empty string given, try stringParse(string)\n\tUse a valid {x00} to place the variable\n\tThese are keys in $vars');
+            return false;
+        }
+        while (strpos($string, "{x") !== false) {
+            $string = $this->string_replace_x($this->vars, $string);
+        }
+        return $string;
+    }
+
+    /**
+     * Echo message at $msg_id
+     */
+    public function msg(float $msg_id, string $arb_msg = "")
+    {
+        echo $this->messages[$msg_id] . $arb_msg;
+        return;
+    }
+
+    /**
+     * the X function. Because the other letters are dumb.
+     *
+     * use a space between each binary command
+     */
+    private function x(string $j, int $i)
+    {
+        {
+            $t = $j;
+            if ($t == "000000") {   // s1 * s2
+                return cosh((float)$this->seq[$i]);
+            } elseif ($t == "000001") {   // s1 * s2
+                return cos((float)$this->seq[$i]);
+            } elseif ($t == "000010") {   // s1 * s2
+                return sinh((float)$this->seq[$i]);
+            } elseif ($t == "000011") {   // s1 * s2
+                return sin((float)$this->seq[$i]);
+            } elseif ($t == "000100") {   // s1 * s2
+                return tanh((float)$this->seq[$i]);
+            } elseif ($t == "000101") {   // s1 * s2
+                return tan((float)$this->seq[$i]);
+            } elseif ($t == "000110") {   // secant
+                return 1 / sin((float)$this->seq[$i]);
+            } elseif ($t == "000111") {   // cosecant
+                return 1 / cos((float)$this->seq[$i]);
+            } elseif ($t == "001000") {   // cotangent
+                return 1 / tan((float)$this->seq[$i]);
+            } elseif ($t == "001001") {   // arcsine
+                return asin((float)$this->seq[$i]);
+            } elseif ($t == "001010") {   // arccosine
+                return acos((float)$this->seq[$i]);
+            } elseif ($t == "001011") {   // arctangent
+                return atan((float)$this->seq[$i]);
+            } elseif ($t == "001100") {   // inverse sine
+                return 1 / (1 / cos((float)$this->seq[$i]));
+            } elseif ($t == "001101") {   // inverse cosine
+                return sin((float)$this->seq[$i]) / cos((float)$this->seq[$i]);
+            } elseif ($t == "001110") {   // inverse cotangent
+                return cos((float)$this->seq[$i]) / sin((float)$this->seq[$i]);
+            } elseif ($t == "001111") {   // constant rule
+                return 0;
+            } elseif ($t == "010000") {   // s1 * s2
+                return $this->sum_rule((float)$this->seq[$i]);
+            } elseif ($t == "010001") {   // s1 - s2
+                return $this->diff_rule((float)$this->seq[$i]);
+            } elseif ($t == "010010" && sizeof($this->seq) >= 2) {   // s1 ^ s2
+                return $this->power_rule(array_slice($this->seq, 0, 2));
+            } elseif ($t == "010011") {   // s1 * s2
+                return $this->product_rule((float)$this->seq[$i]);
+            } elseif ($t == "010100") {   // s1 / s2
+                return $this->quotient_rule((float)$this->seq[$i]);
+            } elseif ($t == "010101") {   // s1 * s2
+                return $this->chain_rule((float)$this->seq[$i]);
+            } elseif ($t == "010110") {   // ^2
+                return pow((float)$this->seq[$i], (float)$this->seq[$i+1]);
+            } elseif ($t == "010111") {   // s1 + s2
+                return " + ";
+            } elseif ($t == "011000") {   // s1 - s2
+                return " - ";
+            } elseif ($t == "011001") {   // s1 * s2
+                return " * ";
+            } elseif ($t == "011010") {   // $s / $s2
+                return " / ";
+            } elseif ($t == "011100") {   // s1 > s2
+                return ((float)$this->seq[$i] > $this->seq[$i+1]);
+            } elseif ($t == "011101") {   // s1 < s2
+                return ((float)$this->seq[$i] < $this->seq[$i+1]);
+            } elseif ($t == "011110") {   // s1 * s2
+                return ((float)$this->seq[$i] >= $this->seq[$i+1]);
+            } elseif ($t == "011111") {   // s1 >= s2
+                return ((float)$this->seq[$i] <= $this->seq[$i+1]);
+            } elseif ($t == "100000") {   // s1 != s2
+                return ((float)$this->seq[$i] != $this->seq[$i+1]);
+            } elseif ($t == "100001") {   // s1 != s2
+                return ((float)$this->seq[$i] == $this->seq[$i+1]);
+            } elseif ($t == "100010") {   // s1 && s2
+                return ((bool)substr($this->condition, -1) && $this->seq[$i] == $this->seq[$i+1]);
+            } elseif ($t == "100011") {   // s1 && s2
+                return ((bool)substr($this->condition, -1) && $this->seq[$i] != $this->seq[$i+1]);
+            } elseif ($t == "100100") {   // s1 && s2
+                return ((bool)substr($this->condition, -1) && $this->seq[$i] > $this->seq[$i+1]);
+            } elseif ($t == "100101") {   // s1 && s2
+                return ((bool)substr($this->condition, -1) && $this->seq[$i] < $this->seq[$i+1]);
+            } elseif ($t == "100110") {   // s1 && s2
+                return ((bool)substr($this->condition, -1) && $this->seq[$i] >= $this->seq[$i+1]);
+            } elseif ($t == "100111") {   // s1 && s2
+                return ((bool)substr($this->condition, -1) && $this->seq[$i] <= $this->seq[$i+1]);
+            } elseif ($t == "101000") {   // s1 || s2
+                return ((bool)substr($this->condition, -1) || $this->seq[$i] == $this->seq[$i+1]);
+            } elseif ($t == "101001") {   // s1 || s2
+                return ((bool)substr($this->condition, -1) || $this->seq[$i] != $this->seq[$i+1]);
+            } elseif ($t == "101010") {   // s1 || s2
+                return ((bool)substr($this->condition, -1) || $this->seq[$i] > $this->seq[$i+1]);
+            } elseif ($t == "101011") {   // s1 || s2
+                return ((bool)substr($this->condition, -1) || $this->seq[$i] < $this->seq[$i+1]);
+            } elseif ($t == "101100") {   // s1 || s2
+                return ((bool)substr($this->condition, -1) || $this->seq[$i] >= $this->seq[$i+1]);
+            } elseif ($t == "101101") {   // s1 || s2
+                return ((bool)substr($this->condition, -1) || $this->seq[$i] <= $this->seq[$i+1]);
+            } elseif ($t == "101110") {   // s1 ^ s2
+                return ((bool)substr($this->condition, -1) ^ $this->seq[$i] == $this->seq[$i+1]);
+            } elseif ($t == "101111") {   // s1 ^ s2
+                return ((bool)substr($this->condition, -1) ^ $this->seq[$i] != $this->seq[$i+1]);
+            } elseif ($t == "110000") {   // s1 ^ s2
+                return ((bool)substr($this->condition, -1) ^ $this->seq[$i] > $this->seq[$i+1]);
+            } elseif ($t == "110001") {   // s1 ^ s2
+                return ((bool)substr($this->condition, -1) ^ $this->seq[$i] < $this->seq[$i+1]);
+            } elseif ($t == "110010") {   // s1 ^ s2
+                return ((bool)substr($this->condition, -1) ^ $this->seq[$i] >= $this->seq[$i+1]);
+            } elseif ($t == "110011") {   // s1 ^ s2
+                return ((bool)substr($this->condition, -1) ^ $this->seq[$i] <= $this->seq[$i+1]);
+            } elseif ($t == "110100") {    // factorial
+                return $this->mathFact((float)$this->seq[$i]);
+            } elseif ($t == "110101") {   // ln()
+                return exp((float)$this->seq[$i]);
+            } elseif ($t == "110110") {   // ln()
+                return log((float)$this->seq[$i]);
+            } elseif ($t == "110111") {   // log_base()
+                return log((float)$this->seq[$i], (float)$this->seq[$i+1]);
+            } elseif ($t == "111000") {   // integrand()
+                return $this->calculus("111000", $this->seq);
+            } elseif ($t == "110001") {   // integral()
+                return $this->calculus("111001", $this->seq);
+            } elseif ($t == "110010") {   // find_integral()
+                return $this->calculus("111010", $this->seq);
+            }
+
+        }
+        if (strlen($this->sigma) > 0) {
+            return eval("return $this->sigma;");
+        }
+    }
+
+    public function calculus(string $t, array $sequence)
+    {
+        {
+            if ($t == "111000") {   // integrand
+                return $this->integrand($sequence);
+            } elseif ($t == "111001") {   // integral // Make seq[$i] a subarray & seq[1] the average height of perimeter
+                return $this->integral($sequence);
+            } elseif ($t == "111010") {   // integral
+                return $this->find_integral($sequence);
+            }
+        }
+    }
+
+    public function integral(array $sequence)
+    {
+        $length = array_sum($sequence);
+        $avg_height = array_sum($sequence) / count($sequence);
+        return ($length * $avg_height);
+    }
+
+    /**
+     *
+     * Integrand ([[secant, y = base/min, height = base/max], [sec, y, high]])
+     *
+     */
+    public function find_integral(array $sequence)
+    {
+        $h = [];
+        $sum = [];
+        foreach ($sequence as $k => $v) {
+            $midpoint = (int)$v[0] / 2;
+            $incise = ((int)$v[2] - (int)$v[1]);
+            $perimeter = ($midpoint * 2) + ($incise * 2);
+            $length = $perimeter / 2;
+            $length += $incise / 2;
+            $sum [] = $length;
+            $h [] = (int)$v[2];
+        }
+        $integral = $this->integral($sum, array_sum($h) / count($h));
+        return $integral;
+    }
+
+    /**
+     *
+     * Integrand ([secant, y = base/min, height = base/max])
+     *
+     */
+    public function integrand(array $sequence)
+    {
+        $midpoint = $sequence[0] / 2;
+        $incise = abs($sequence[2] - $sequence[1]);
+        $perimeter = ($midpoint * 2) + ($incise * 2);
+        $length = $perimeter / 2;
+        $length += $incise / 2;
+
+        return $length;
+    }
+
+    /**
+     *
+     * Factorials
+     *
+     */
+    public function mathFact($s)
+    {
+        $r = (int) $s;
+
+        if ($r < 2) {
+            $r = 1;
+        } else {
+            for ($i = $r-1; $i > 1; $i--) {
+                $r = $r * $i;
+            }
+        }
+        return $r;
+    }
+
+    /**
+     *
+     * get function of g() -- Use {x} wherever you need your variable
+     *
+     */
+    public function f(float $x)
+    {
+        if ($this->f_ == "") {
+            $this->msg(0, "No function given, try set_f_of(string x)\n\tUse {x} to place the variable.");
+            exit(0);
+        }
+        $v = ($this->stringParse($this->f_));
+        return eval("return $v;");
+    }
+
+    /**
+     *
+     * set function of f() -- Use {x} wherever you need your variable
+     *
+     */
+    public function set_f_of(string $ev)
+    {
+        $this->f_ = $ev;
+    }
+
+    /**
+     *
+     * get function of g() -- Use {x} wherever you need your variable
+     *
+     */
+    public function g(float $x)
+    {
+        if ($this->g_ == "") {
+            $this->msg(0, "No function given, try set_g_of(string x)\n\tUse {x} to place the variable");
+            exit(0);
+        }
+        $v = ($this->stringParse($this->g_));
+
+        return eval("return $v;");
+    }
+
+    /**
+     *
+     * set function of g()
+     *
+     */
+    public function set_g_of(string $ev)
+    {
+        $this->g_ = $ev;
+    }
+
+    /**
+     *
+     * Condition d/dx [f(x)+g(x)]
+     *
+     */
+    public function sum_rule(float $sequence)
+    {
+        $tmp1 = $this->f((float)$sequence);
+        $tmp2 = $this->g((float)$sequence);
+
+        return $tmp1 + $tmp2;
+    }
+
+    /**
+     *
+     * Condition d/dx [f(x)-g(x)]
+     *
+     */
+    public function diff_rule(float $sequence)
+    {
+        $tmp1 = $this->f((float)$sequence);
+        $tmp2 = $this->g((float)$sequence);
+
+        return $tmp1 - $tmp2;
+    }
+
+    /**
+     *
+     * Condition d/dx [x^n]
+     *
+     */
+    public function power_rule(array $sequence)
+    {
+        $tmp = $sequence;
+
+        return (float)(pow((int)$tmp[0], (int)$tmp[1]-1) * (float)$tmp[1]);
+    }
+
+    /**
+     *
+     * Condition d/dx [f(x)g(x)]
+     *
+     */
+    public function product_rule(float $sequence)
+    {
+
+        // f'(x)                // f(x)
+        $tmp_f = $this->f((float)$sequence);
+        // g'(x)                // g(x)
+        $tmp_g = $this->g((float)$sequence);
+
+        $tmp_ff = $this->f((float)$tmp_f);
+        $tmp_gg = $this->g((float)$tmp_g);
+        $final1a = $tmp_ff * $tmp_g;
+        $final1b = $tmp_f * $tmp_gg;
+        return $final1b + $final1a;
+    }
+
+    /**
+     *
+     * Condition d/dx [f(g(x))]
+     *
+     */
+    public function chain_rule(float $sequence)
+    {
+
+        // g'(x)                // g(x)
+        $tmp_g = (float)($this->g($this->seq[0]));
+
+        // f'(x)                // f(x)
+        $tmp_f = (float)($this->f($tmp_g));
+
+        $tmp_ff = ($this->f($tmp_f));
+        $tmp_gg = ($this->g($tmp_f));
+
+        return $tmp_ff * $tmp_gg;
+    }
+
+    /**
+     *
+     * Condition d/dx [f(x)/g(x)]
+     *
+     */
+    public function quotient_rule(float $sequence)
+    {
+        $tmp_f = (float)$this->f((float)$this->sequence);
+        $tmp_g = (float)$this->g((float)$this->sequence);
+
+        $tmp_ff = (float)$this->f($tmp_f);
+        $tmp_gg = (float)$this->f($tmp_g);
+
+        $final1a = $tmp_ff * $tmp_g;
+        $final1b = $tmp_f * $tmp_gg;
+
+        $final2 = $final1a * $final1b;
+        $answer = $final2 / ($tmp_g * $tmp_g);
+        return ($answer);
+    }
+}
+>>>>>>> 20922e2aad7d6b049a935c3e49da44d52e74626d
