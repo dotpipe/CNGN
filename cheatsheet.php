@@ -1,7 +1,5 @@
 <?php
-
 /**
- * 
  * Cheat sheet
  * -----------------------
  * Trig Functions
@@ -76,7 +74,5 @@
  * 111000 = integrand (width,y,height) (read the function)
  * 111001 = integral
  * 111010 = find_integral ([[width,y,height],[w,y,h], ...])
- * 
+ *
  */
-
-?>
