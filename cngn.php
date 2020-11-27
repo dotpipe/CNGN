@@ -357,7 +357,7 @@
                 $sum [] = $length;
                 $h [] = (int)$v[2];
             }
-            $integral = $this->integral($sum, array_sum($h) / count($h));
+            $integral = $this->integral($sum);
             return $integral;
         }
 
