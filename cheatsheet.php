@@ -74,5 +74,7 @@
  * 111000 = integrand (width,y,height) (read the function)
  * 111001 = integral
  * 111010 = find_integral ([[width,y,height],[w,y,h], ...])
+ * 111011 = conditional probability (B) // uses $this->condition (A)
+ * 111100 = Bayes probability (AB, A) // uses $this->condition (B)
  *
  */
