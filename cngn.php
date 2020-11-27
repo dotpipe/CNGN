@@ -252,71 +252,91 @@
                 else if ($t == "011010")   // $s / $s2
                 {    return " / "; }
                 else if ($t == "011100")   // s1 > s2
-                {    return ((float)$this->seq[$i] > $this->seq[$i+1]); }
+                {    return $this->condition .= ((float)$this->seq[$i] > $this->seq[$i+1]); }
                 else if ($t == "011101")   // s1 < s2
-                {    return ((float)$this->seq[$i] < $this->seq[$i+1]); }
-                else if ($t == "011110")   // s1 * s2
-                {    return ((float)$this->seq[$i] >= $this->seq[$i+1]); }
-                else if ($t == "011111")   // s1 >= s2
-                {    return ((float)$this->seq[$i] <= $this->seq[$i+1]); }
+                {    return $this->condition .= ((float)$this->seq[$i] < $this->seq[$i+1]); }
+                else if ($t == "011110")   // s1 >= s2
+                {    return $this->condition .= ((float)$this->seq[$i] >= $this->seq[$i+1]); }
+                else if ($t == "011111")   // s1 <= s2
+                {    return $this->condition .= ((float)$this->seq[$i] <= $this->seq[$i+1]); }
                 else if ($t == "100000")   // s1 != s2
-                {    return ((float)$this->seq[$i] != $this->seq[$i+1]); }
-                else if ($t == "100001")   // s1 != s2
-                {    return ((float)$this->seq[$i] == $this->seq[$i+1]); }
+                {    return $this->condition .= ((float)$this->seq[$i] != $this->seq[$i+1]); }
+                else if ($t == "100001")   // s1 == s2
+                {    return $this->condition .= ((float)$this->seq[$i] == $this->seq[$i+1]); }
                 else if ($t == "100010")   // s1 && s2
-                {    return ((bool)substr($this->condition,-1) && $this->seq[$i] == $this->seq[$i+1]); }
+                {    return $this->condition .= ((bool)substr($this->condition,-1) && $this->seq[$i] == $this->seq[$i+1]); }
                 else if ($t == "100011")   // s1 && s2
-                {    return ((bool)substr($this->condition,-1) && $this->seq[$i] != $this->seq[$i+1]); }
+                {    return $this->condition .= ((bool)substr($this->condition,-1) && $this->seq[$i] != $this->seq[$i+1]); }
                 else if ($t == "100100")   // s1 && s2
-                {    return ((bool)substr($this->condition,-1) && $this->seq[$i] > $this->seq[$i+1]); }
+                {    return $this->condition .= ((bool)substr($this->condition,-1) && $this->seq[$i] > $this->seq[$i+1]); }
                 else if ($t == "100101")   // s1 && s2
-                {    return ((bool)substr($this->condition,-1) && $this->seq[$i] < $this->seq[$i+1]); }
+                {    return $this->condition .= ((bool)substr($this->condition,-1) && $this->seq[$i] < $this->seq[$i+1]); }
                 else if ($t == "100110")   // s1 && s2
-                {    return ((bool)substr($this->condition,-1) && $this->seq[$i] >= $this->seq[$i+1]); }
+                {    return $this->condition .= ((bool)substr($this->condition,-1) && $this->seq[$i] >= $this->seq[$i+1]); }
                 else if ($t == "100111")   // s1 && s2
-                {    return ((bool)substr($this->condition,-1) && $this->seq[$i] <= $this->seq[$i+1]); }
+                {    return $this->condition .= ((bool)substr($this->condition,-1) && $this->seq[$i] <= $this->seq[$i+1]); }
                 else if ($t == "101000")   // s1 || s2
-                {    return ((bool)substr($this->condition,-1) || $this->seq[$i] == $this->seq[$i+1]); }
+                {    return $this->condition .= ((bool)substr($this->condition,-1) || $this->seq[$i] == $this->seq[$i+1]); }
                 else if ($t == "101001")   // s1 || s2
-                {    return ((bool)substr($this->condition,-1) || $this->seq[$i] != $this->seq[$i+1]); }
+                {    return $this->condition .= ((bool)substr($this->condition,-1) || $this->seq[$i] != $this->seq[$i+1]); }
                 else if ($t == "101010")   // s1 || s2
-                {    return ((bool)substr($this->condition,-1) || $this->seq[$i] > $this->seq[$i+1]); }
+                {    return $this->condition .= ((bool)substr($this->condition,-1) || $this->seq[$i] > $this->seq[$i+1]); }
                 else if ($t == "101011")   // s1 || s2
-                {    return ((bool)substr($this->condition,-1) || $this->seq[$i] < $this->seq[$i+1]); }
+                {    return $this->condition .= ((bool)substr($this->condition,-1) || $this->seq[$i] < $this->seq[$i+1]); }
                 else if ($t == "101100")   // s1 || s2
-                {    return ((bool)substr($this->condition,-1) || $this->seq[$i] >= $this->seq[$i+1]); }
+                {    return $this->condition .= ((bool)substr($this->condition,-1) || $this->seq[$i] >= $this->seq[$i+1]); }
                 else if ($t == "101101")   // s1 || s2
-                {    return ((bool)substr($this->condition,-1) || $this->seq[$i] <= $this->seq[$i+1]); }
+                {    return $this->condition .= ((bool)substr($this->condition,-1) || $this->seq[$i] <= $this->seq[$i+1]); }
                 else if ($t == "101110")   // s1 ^ s2
-                {    return ((bool)substr($this->condition,-1) ^ $this->seq[$i] == $this->seq[$i+1]); }
+                {    return $this->condition .= ((bool)substr($this->condition,-1) ^ $this->seq[$i] == $this->seq[$i+1]); }
                 else if ($t == "101111")   // s1 ^ s2
-                {    return ((bool)substr($this->condition,-1) ^ $this->seq[$i] != $this->seq[$i+1]); }
+                {    return $this->condition .= ((bool)substr($this->condition,-1) ^ $this->seq[$i] != $this->seq[$i+1]); }
                 else if ($t == "110000")   // s1 ^ s2
-                {    return ((bool)substr($this->condition,-1) ^ $this->seq[$i] > $this->seq[$i+1]); }
+                {    return $this->condition .= ((bool)substr($this->condition,-1) ^ $this->seq[$i] > $this->seq[$i+1]); }
                 else if ($t == "110001")   // s1 ^ s2
-                {    return ((bool)substr($this->condition,-1) ^ $this->seq[$i] < $this->seq[$i+1]); }
+                {    return $this->condition .= ((bool)substr($this->condition,-1) ^ $this->seq[$i] < $this->seq[$i+1]); }
                 else if ($t == "110010")   // s1 ^ s2
-                {    return ((bool)substr($this->condition,-1) ^ $this->seq[$i] >= $this->seq[$i+1]); }
+                {    return $this->condition .= ((bool)substr($this->condition,-1) ^ $this->seq[$i] >= $this->seq[$i+1]); }
                 else if ($t == "110011")   // s1 ^ s2
-                {    return ((bool)substr($this->condition,-1) ^ $this->seq[$i] <= $this->seq[$i+1]); }
+                {    return $this->condition .= ((bool)substr($this->condition,-1) ^ $this->seq[$i] <= $this->seq[$i+1]); }
                 else if ($t == "110100")    // factorial
                 {    return $this->mathFact((float)$this->seq[$i]); }
                 else if ($t == "110101")   // ln()
-                {    return exp((float)$this->seq[$i]); }
+                {    return  exp((float)$this->seq[$i]); }
                 else if ($t == "110110")   // ln()
                 {    return log((float)$this->seq[$i]); }
                 else if ($t == "110111")   // log_base()
                 {    return log((float)$this->seq[$i], (float)$this->seq[$i+1]); }
                 else if ($t == "111000")   // integrand()
                 {    return $this->calculus("111000", $this->seq); }
-                else if ($t == "110001")   // integral()
+                else if ($t == "111001")   // integral()
                 {    return $this->calculus("111001", $this->seq); }
-                else if ($t == "110010")   // find_integral()
+                else if ($t == "111010")   // find_integral()
                 {    return $this->calculus("111010", $this->seq); }
+                else if ($t == "111011")   // cond_prob() // uses $this->condition
+                {    return $this->cond_prob($this->seq[$i]); }
+                else if ($t == "111100")   // bayes_prob() // uses $this->condition as prior probability
+                {    return $this->bayes_prob($this->seq[$i], $this->seq[$i+1]); }
 
             }
             if (strlen($this->sigma) > 0)
                 return eval("return $this->sigma;");
+        }
+
+        public function cond_prob(string $B)
+        {
+            $PA = substr_count($this->condition,"1");
+            $PB = substr_count($B,"1");
+
+            return (int)$PA/$PB;
+        }
+
+        public function bayes_prob(string $AB, string $A)
+        {
+            $PB = substr_count($this->condition,"1") / strlen($this->condition);
+            $PA = substr_count($A,"1") / strlen($A);
+
+            return ($AB * $PB) / $PA;
         }
 
         public function calculus(string $t, array $sequence)

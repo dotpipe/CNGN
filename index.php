@@ -15,7 +15,7 @@ $x->set_g_of('1 + {x0} + 20');
 $seq = [6, 10, 35, 30, 10, 4, 5];
 
 $x->register_fn_x(2);
-$seq = ["{x2} + {x6}", 22, "{x1} + 3", 30, [10, 11, -2], 4, 5];
+$seq = ["{x2} + {x6}", 22, "{x1} + 3", 30, [10, 11, -2], 4, 5, "101010"];
 $x->load_vars($seq);
 //               don't sweat this, 011001 is the code for 'return *';
 $x->load_fn_x(["{x0}", "{x5} {c011001,0} - {x2} +  {x3} + 5 + {x1}"]);
@@ -27,4 +27,14 @@ $t = $x->mathParse($x->fn_x[1], $f);
 echo "<br />" . $t;
 
 $t = $x->integrand($f[0]);
-echo "<br />" . $t;
+echo "<br />" . $t . "<br />";
+
+$x->load_fn_x(["{c011110,1}{c011110,5}{c011110,0}","{c111011,7}"]);
+
+$t = $x->mathParse($x->fn_x[0], $x->vars);
+
+echo $t . " ";
+
+$t = $x->mathParse($x->fn_x[1], $x->vars);
+
+echo $t . " ";
