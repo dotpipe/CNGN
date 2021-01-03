@@ -17,6 +17,9 @@
         {
             $this->messages[] = "Error: " ;
             $this->register_vars($index_cnt);
+            $this->zeta_loss();
+            echo "<br><br><br><br>";
+            $this->bitcoin(); 
         }
 
         public function string_replace_x($replacements, &$template) {
@@ -302,25 +305,52 @@
                 else if ($t == "110100")    // factorial
                 {    return $this->mathFact((float)$this->seq[$i]); }
                 else if ($t == "110101")   // ln()
-                {    return  exp((float)$this->seq[$i]); }
+                {    return exp((float)$this->seq[$i]); }
                 else if ($t == "110110")   // ln()
                 {    return log((float)$this->seq[$i]); }
                 else if ($t == "110111")   // log_base()
                 {    return log((float)$this->seq[$i], (float)$this->seq[$i+1]); }
                 else if ($t == "111000")   // integrand()
-                {    return $this->calculus("111000", $this->seq); }
+                {    return $this->calculus("000000", $this->seq); }
                 else if ($t == "111001")   // integral()
-                {    return $this->calculus("111001", $this->seq); }
+                {    return $this->calculus("000001", $this->seq); }
                 else if ($t == "111010")   // find_integral()
-                {    return $this->calculus("111010", $this->seq); }
+                {    return $this->calculus("000010", $this->seq); }
+                else if ($t == "111010")   // find_integral()
+                {    return $this->calculus("000011", $this->seq); }
                 else if ($t == "111011")   // cond_prob() // uses $this->condition
                 {    return $this->cond_prob($this->seq[$i]); }
                 else if ($t == "111100")   // bayes_prob() // uses $this->condition as prior probability
                 {    return $this->bayes_prob($this->seq[$i], $this->seq[$i+1]); }
+                else if ($t == "111101")   // is_prime
+                {    return $this->is_prime($this->seq[$i]); }
+                else if ($t == "111110")   // XOR
+                {    return $this->bitw_cmp($this->seq); }
 
             }
             if (strlen($this->sigma) > 0)
                 return eval("return $this->sigma;");
+        }
+
+        public function bitw_cmp(array $lr)
+        {
+            $aw = $lr[0];
+            $lb = $lr[1];
+            $rb = $lr[2];
+            if (decbin($lr[1]) == $lr[1])
+                $lb = bindec($lr[1]);
+            if (decbin($lr[2]) == $lr[2])
+                $rb = bindec($lr[2]);
+                if ($aw == "00")
+                    return $lb ^ $rb;
+                else if ($aw == "01")
+                    return $lb & $rb;
+                else if ($aw == "10")
+                    return $lb | $rb;
+                else if ($aw == "11")
+                    return $lb >> $rb;
+                else if ($aw == "100")
+                    return $lb << $rb;
         }
 
         public function cond_prob(string $B)
@@ -339,15 +369,43 @@
             return ($AB * $PB) / $PA;
         }
 
+        public function is_prime($number)
+        {
+            // 1 is not prime
+            if ( $number == 1 ) {
+                return false;
+            }
+            // 2 is the only even prime number
+            if ( $number == 2 ) {
+                return true;
+            }
+            // square root algorithm speeds up testing of bigger prime numbers
+            $x = sqrt($number);
+            $x = floor($x);
+            for ( $i = 2 ; $i <= $x ; ++$i ) {
+                if ( $number % $i == 0 ) {
+                    break;
+                }
+            }
+         
+            if( $x == $i-1 ) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
         public function calculus(string $t, array $sequence)
         {
             {
-                if ($t == "111000")   // integrand
+                if ($t == "000000")   // integrand
                 {    return $this->integrand($sequence); }
-                else if ($t == "111001")   // integral // Make seq[$i] a subarray & seq[1] the average height of perimeter 
+                else if ($t == "000001")   // integral // Make seq[$i] a subarray & seq[1] the average height of perimeter 
                 {    return $this->integral($sequence); }
-                else if ($t == "111010")   // integral 
+                else if ($t == "000010")   // integral 
                 {    return $this->find_integral($sequence); }
+                else if ($t == "000011")   // integral 
+                {    return $this->differential($sequence); }
             }
         }
 
@@ -370,7 +428,7 @@
             foreach ($sequence as $k => $v)
             {
                 $midpoint = (int)$v[0] / 2; 
-                $incise = ((int)$v[2] - (int)$v[1]);
+                $incise = abs((int)$v[2] - (int)$v[1]);
                 $perimeter = ($midpoint * 2) + ($incise * 2);
                 $length = $perimeter / 2;
                 $length += $incise / 2;
@@ -381,7 +439,183 @@
             return $integral;
         }
 
-        /**,
+
+        public function zeta_loss()
+        {
+            $seq = [
+                1,  1, 0
+            ];
+            $tr = [];
+            $y= 0;
+            $differential = $this->differential($seq);
+            for($i = 4 ; (count($tr)) < 1000 ; $i++)
+            {
+                $v = ($i%4 == 0) ? : -1;
+                $integrand = floor(($this->integrand($seq) + $differential)) - 1;
+                $differential = ($this->differential($seq));
+                $tf = (($integrand) * 2 + $v - 4);
+                $seq[0] = $tf;
+                if (in_array($tf,$tr))
+                    continue;
+                $this->is_prime($tf) ? array_push($tr, $tf) : "";
+                echo $this->is_prime($tf) ? '<b style="color:darkblue">'.$tf.'</b> ' : "-";
+                $tr = array_unique($tr);
+                
+                // $integrand = ceil(($this->integrand($seq) + $differential));
+                // $differential = ($this->differential($seq));
+                // echo $this->is_prime(($integrand) * 2 - ($r*2) + $v) . " -- ";
+                // $seq[0] = $integrand * 2 - ($r*2) + $v;
+            }
+            echo count($tr);
+        }
+
+        // public function bitcoin_trans()
+        // {
+        //     $seq = [
+        //         [//2010
+        //             195,
+        //             0.08,
+        //             0.80
+        //         ],
+        //         [//2011
+        //             11400,
+        //             0.80,
+        //             32
+        //         ],
+        //         [//2012
+        //             22463,
+        //             32,769.10
+        //         ],
+        //         [//2013
+        //             16431,769.10,313.99
+        //         ],
+        //         [//2014
+        //             57000,313.99,211
+        //         ],
+        //         [//2015
+        //             89000,211,484.33
+        //         ],
+        //         [//2016
+        //             204690,484.31,972
+        //         ],
+        //         [//2017
+        //             251000,972,15416
+        //         ],
+        //         [//2018
+        //             230300,15416,3848
+        //         ],
+        //         [//2019
+        //             351500,3848,7189
+        //         ],
+        //         [//2020
+        //             331300,7189,28889
+        //         ]
+        //     ];
+        //     $returning = [];
+        //     $y = 0;
+        //     echo "<br>Integrands";
+        //     foreach($seq as $key) {
+        //         echo "<br><b>" . (2010 + $y) . "</b> <u>" . $this->integrand($key) . "</u>";
+        //         $y++;
+        //     }
+        //     $y = 0;
+        //     echo "<br>Integrals";
+        //     foreach($seq as $key) {
+        //         echo "<br><b>" . (2010 + $y) . "</b> <u>" . $this->integral($key) . "</u>";
+        //         $y++;
+        //     }
+        //     $y = 0;
+        //     echo "<br>Differentials";
+        //     foreach($seq as $key) {
+        //         echo "<br><b>" . (2010 + $y) . "</b> <u>" . $this->differential($key) . "</u>";
+        //         $y++;
+        //     }
+        //     echo "<br>Total Integral";
+        //     echo "<br>".$this->find_integral($seq);
+        //     echo "<br>";
+        // }
+        public function bitcoin()
+        {
+            $seq = [
+                [
+                    366,0.29,4
+                ],
+                [
+                    365,4,13
+                ],
+                [
+                    365,13,769.10
+                ],
+                [
+                    365,769.10,313.99
+                ],
+                [
+                    365,313.99,432.36
+                ],
+                [
+                    366,432.36,964.33
+                ],
+                [
+                    365,964.33,13634.69
+                ],
+                [
+                    365,13634.69,3689.56
+                ],
+                [
+                    365,3689.56,7174.74
+                ],
+                [
+                    366,7174.74,29111.52
+                ],
+                [
+                    6,29111.52,35000
+                ]
+            ];
+            $returning = [];
+            $y = 0;
+            echo "<br>Integrands";
+            foreach($seq as $key) {
+                echo "<br><span><b>" . (20 + $y) . "</b> <u>" . $this->integrand($key) . "</u></span>";
+                $returning[] = $this->integrand($key);
+                $y++;
+            }
+            $y = 0;
+            echo "<br>Integrals";
+            foreach($seq as $key) {
+                echo "<br><span><b>" . (20 + $y) . "</b> <u>" . $this->integral($key) . "</u></span>";
+                $returning[] = $this->integral($key);
+                $y++;
+            }
+            $y = 0;
+            echo "<br>Differentials";
+            foreach($seq as $key) {
+                echo "<br><span><b>" . (20 + $y) . "</b> <u>" . $this->differential($key) . "</u></span>";
+                $returning[] = $this->differential($key);
+                $y++;
+            }
+            $y = 0;
+            echo "<br>Derivatives";
+            foreach($seq as $key) {
+                $b = $key;
+                $b[] = $this->integrand($key);
+                $c = $this->differential($key);
+                echo "<br><span><b>" . (20 + $y) . "</b> <u>" . $this->derive($b) . "</u></span>";
+                $returning = $this->derive($b);
+                $i = 0;
+                //while ($i < $y + 1)
+                {
+                    $c = $c / $returning;
+                    $i++;
+                }
+                echo " &nbsp; &nbsp;" . $c;
+                $y++;
+            }
+            echo "<br>Total Integral";
+            echo "<br> &nbsp; &nbsp;" . $this->find_integral($seq);
+            echo "<br>";
+        }
+
+        /**
          * 
          * Integrand ([secant, y = base/min, height = base/max])
          * 
@@ -397,6 +631,43 @@
             return $length;
         }
 
+        /**
+         * 
+         * Integrand ([secant, y = base/min, height = base/max])
+         * 
+         */
+        public function differential(array $sequence)
+        {
+            $midpoint = $sequence[0] / 2; 
+            $incise = abs($sequence[2] - $sequence[1]);
+            $perimeter = ($midpoint * 2) + ($incise * 2);
+            $length = $perimeter / 2;
+            $length += $incise / 2;
+
+            
+            $midpoint = $sequence[0] / $length; 
+            $incise = abs($sequence[2] - $sequence[1]);
+            $perimeter = ($midpoint * 2) + ($incise * 2);
+            $length = $perimeter / 2;
+            $length += $incise / 2;
+
+            return $length;
+        }
+
+        /**
+         * 
+         * Derive ([secant, y = base/min, height = base/max])
+         * 
+         */
+        public function derive(array $sequence)
+        {
+            $midpoint = $sequence[0] / $sequence[3]; 
+            $incise = abs($sequence[2] - $sequence[1]);
+            $perimeter = ($midpoint * 2) + ($incise * 2);
+            $length = $perimeter / 2;
+            $length += $incise / 2;
+            return $sequence[3] / $length;
+        }
         /**
          * 
          * Factorials
@@ -568,4 +839,4 @@
             return ($answer);
         }
     }
-?>
+    $next = new CNGN(5);
