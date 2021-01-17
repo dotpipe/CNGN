@@ -440,15 +440,15 @@
         public function zeta_loss()
         {
             $seq = [
-                1.057,  0.2581403, 3.11483
+                1,  1.2581403, 3.11483
             ];
             $tr = [];
             $i = 0;
-            for($i = 2 ; count($tr) < 1229 ; $i++)
+            for($i = 0 ; count($tr) < 1229 ; $i++)
             {
                 $v = ($i%3) ? : 1;
                 $tf = $seq[0] = floor($this->integrand($seq)*2) - $v;
-                $tf -= ($seq[1] = floor($this->differential($seq)));
+                $tf -= $seq[1] = floor($this->differential($seq));
                 $tf = ($tf);
                 if (in_array($tf,$tr))
                     continue;
