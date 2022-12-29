@@ -501,7 +501,7 @@
 
         /**
          * 
-         * Derive ([secant, y = base/min, height = base/max])
+         * Derive ([secant, y = base/min, height = base/max, last returned answer])
          * 
          */
         public function derive(array $sequence)
