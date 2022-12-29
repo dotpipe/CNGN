@@ -344,10 +344,17 @@
                     return $lb & $rb;
                 else if ($aw == "10")
                     return $lb | $rb;
-                else if ($aw == "11")
-                    return $lb >> $rb;
-                else if ($aw == "100")
-                    return $lb << $rb;
+        }
+        
+        public function bitw_mov(array $lr)
+        {
+            $aw = $lr[0];
+            $lb = $lr[1];
+            $rb = $lr[2];
+            if ($aw == "1")
+                return $lb >> $rb;
+            else if ($aw == "0")
+                return $lb << $rb;
         }
 
         public function cond_prob(string $vals)
