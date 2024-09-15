@@ -51,13 +51,6 @@ $t = $x->integrand($f[0]);
 
 $x->load_fn_x(["{c011110,1}{c011110,5}{c011110,0}","{c111011,7}"]);
 
-$t = $x->mathParse($x->fn_x[0], $x->vars);
-
-$t = 49.5
-
-$t = $x->mathParse($x->fn_x[1], $x->vars);
-
-$t = 0
 
 Just use your imagination and the criteria to come up with the answer you require!
  
