@@ -35,11 +35,11 @@ $x->load_vars($seq);
 
 $x->load_fn_x(["{x0}", "{x5} {c011001,0} - {x2} +  {x3} + 5 + {x1}"]);
 
-echo "<br />". json_encode($x->fn_x);
+echo json_encode($x->fn_x);
 
 $t = $x->mathParse($x->fn_x[1], $x->vars);
 
-echo "<br />" . $t;
+$t = -28
 
 $f = [[45, -2, 16], [23, 5, 16]];
 
@@ -48,7 +48,6 @@ $t = $x->mathParse($x->fn_x[1], $f);
 $t = -28
 
 $t = $x->integrand($f[0]);
-$t = -28
 
 $x->load_fn_x(["{c011110,1}{c011110,5}{c011110,0}","{c111011,7}"]);
 
