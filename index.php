@@ -4,7 +4,7 @@ require './cngn.php';
 $x = new CNGN(5);
 
 // Use stringParse to dynamically insert data into strings
-$string = "inadeio {x0} {x1} {x2} {x3} {x4}";
+$string = "{x0} {x1} {x2} {x3} {x4}";
 $x->load_vars([25, 2, 3, 4, 60]);
 $string = $x->stringParse($string, $x->vars);
 echo $string . "<br />";
@@ -31,10 +31,3 @@ echo "<br />" . $t . "<br />";
 
 $x->load_fn_x(["{c011110,1}{c011110,5}{c011110,0}","{c111011,7}"]);
 
-$t = $x->mathParse($x->fn_x[0], $x->vars);
-
-echo $t . " ";
-
-$t = $x->mathParse($x->fn_x[1], $x->vars);
-
-echo $t . " ";
